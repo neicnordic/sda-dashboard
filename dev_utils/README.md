@@ -25,3 +25,41 @@ docker-compose -f <sda-pipeline.yaml> up -d
 ```
 
 Under the `Discover` tab, you should be able to see the logs for all containers using an image that starts with `sda-` as well as `minio`
+
+
+### View data in Grafana
+
+#### Add sources
+There are two different sources that can be added in the Grafana instance, the elastic search (containing the logs) and the database (containing information about the files).
+To add the elasticsearch datasource, login to Grafana at `localhost:3000` and use the following:
+- URL: `http://elasticsearch:9200`
+- Skip TLS Verify: True
+- Index name: `filebeat-*
+- Time field name: `@timestamp`
+- ElasticSearch version: `7.10+`
+
+To add the database datasource use the following:
+- Host: `db:5432`
+- Database: `lega`
+- User: `lega_in`
+- Password: `lega_in`
+- TLS/SSL Mode: `disable`
+
+Save and test both datasources.
+
+#### Add dashboards
+Create a new dashboard for presenting the database information. One example could be to add a `table` in order to present the information of all files, using the following query:
+```postgres
+SELECT
+  *
+FROM
+  local_ega.main
+```
+
+Create a new dashboard for presenting the elastic search information. One example could be to add a `histogram` in order to present the the number of logs per timestamp, 
+or to filter for a specific level of logs using a query like:
+```sh
+message:*DEBUG*
+```
+
+
