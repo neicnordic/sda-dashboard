@@ -1,0 +1,226 @@
+version: "3.7"
+services:
+  encrypt: ## downloads the sda-cli tool to create a c4gh key-pair and encrypts files with it
+    image: golang:alpine3.16
+    container_name: encrypt
+    command:
+      - "/bin/sh"
+      - "-c"
+      - if [ ! -f "/out/c4gh.sec.pem" ]; then git --help >/dev/null 2>&1; [[ "$$?" != "0" ]] && apk add git;
+        [ ! -d "crypt4gh" ] && git clone https://github.com/neicnordic/crypt4gh.git;
+        cd crypt4gh;
+        [ ! -f "crypt4gh" ] && go build .;
+        ./crypt4gh generate -n c4gh -p privatekeypass && mv *.pem /out/;
+        for k in file1 file2;do
+        echo | ./crypt4gh encrypt -p /out/c4gh.pub.pem -f /files/user1"$$k" /files/user1"$$k".c4gh;
+        echo | ./crypt4gh encrypt -p /out/c4gh.pub.pem -f /files/user2"$$k" /files/user2"$$k".c4gh;
+        done
+        fi
+        # rm /files/file1.raw;
+    volumes:
+      - ./keys:/out/
+      - ./test_files:/files/
+  upload-files: ## uses the s3cmd cli tool to upload files to an s3 bucket
+    image: python:alpine3.16
+    container_name: upload-files
+    depends_on:
+      - encrypt
+      - s3
+      # - createbucket
+    command:
+      - "/bin/sh"
+      - "-c"
+      - pip3 install s3cmd;
+        s3cmd -c s3cmd.conf mb s3://inbox;
+        s3cmd -c s3cmd.conf mb s3://archive;
+        s3cmd -c s3cmd.conf mb s3://backup;
+        until [ -f "/files/user2file2.c4gh" ]; do sleep 1;done;
+        for k in file1 file2;do
+        s3cmd -c s3cmd.conf put /files/user1"$$k".c4gh s3://inbox/user1/;
+        s3cmd -c s3cmd.conf put /files/user2"$$k".c4gh s3://inbox/user2/;
+        done
+    volumes:
+      - ./s3cmd.conf:/s3cmd.conf
+      - ./test_files:/files/
+  db:
+    command: server /data
+    container_name: db
+    environment:
+      - DB_LEGA_IN_PASSWORD=lega_in
+      - DB_LEGA_OUT_PASSWORD=lega_out
+      - NOTLS=true
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "lega_out"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+    image: neicnordic/sda-db:v1.4.0
+    ports:
+      - "5432:5432"
+    volumes:
+      - /tmp/data:/data
+  mq:
+    image: neicnordic/sda-mq:v1.4.0
+    container_name: mq
+    environment:
+     - MQ_USER=test
+     - MQ_PASSWORD_HASH=C5ufXbYlww6ZBcEqDUB04YdUptO81s+ozI3Ll5GCHTnv8NAm
+     - MQ_VHOST=test
+     - NOTLS=true
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+  s3:
+    command: server /data --console-address ":9001"
+    container_name: s3
+    environment:
+      - MINIO_ACCESS_KEY=access
+      - MINIO_SECRET_KEY=secretkey
+      - MINIO_SERVER_URL=http://127.0.0.1:9000
+    healthcheck:
+      test: ["CMD", "curl", "-fq", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+    image: minio/minio:RELEASE.2022-09-25T15-44-53Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+  ingest:
+    command: sda-ingest
+    container_name: ingest
+    depends_on:
+      - encrypt
+      - db
+      - mq
+      - s3
+    environment:
+      - ARCHIVE_TYPE=s3
+      - ARCHIVE_URL=http://s3
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=ingest
+      - BROKER_ROUTINGKEY=archived
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - INBOX_TYPE=s3
+      - INBOX_URL=http://s3
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+      - archive:/tmp
+    restart: always
+  verify:
+    command: sda-verify
+    container_name: verify
+    depends_on:
+      - encrypt
+      - db
+      - mq
+      - s3
+    environment:
+      - ARCHIVE_URL=http://s3
+      - ARCHIVE_TYPE=s3
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=archived
+      - BROKER_ROUTINGKEY=verified
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - INBOX_TYPE=s3
+      - INBOX_URL=http://s3
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+      - archive:/tmp
+    restart: always
+  finalize:
+    command: sda-finalize
+    container_name: finalize
+    depends_on:
+      - db
+      - mq
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=accessionIDs
+      - BROKER_ROUTINGKEY=backup
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+    restart: always
+  backup:
+    command: sda-backup
+    container_name: backup
+    depends_on:
+      - encrypt
+      - db
+      - mq
+      - s3
+    environment:
+      - ARCHIVE_TYPE=s3
+      - ARCHIVE_URL=http://s3
+      - BACKUP_TYPE=s3
+      - BACKUP_URL=http://s3
+      - BACKUP_LOCATION=/backup
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=backup
+      - BROKER_ROUTINGKEY=completed
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+      - archive:/tmp
+      - backup:/backup
+    restart: always
+  mapper:
+    command: sda-mapper
+    container_name: mapper
+    depends_on:
+      - db
+      - mq
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=mappings
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - DB_USER=lega_out
+      - DB_PASSWORD=lega_out
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+    restart: always
+  interceptor:
+    command: sda-intercept
+    depends_on:
+      - mq
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=files
+      - BROKER_ROUTINGKEY=ingest
+      - BROKER_ROUTINGERROR=error
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./:/dev_utils/
+    restart: always
+volumes:
+     archive:
+     backup:
+     inbox:
