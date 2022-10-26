@@ -1,0 +1,64 @@
+version: "3.7"
+services:
+  mq:
+    image: neicnordic/sda-mq:v1.4.13
+    container_name: mq
+    environment:
+     - MQ_USER=test
+     - MQ_PASSWORD_HASH=C5ufXbYlww6ZBcEqDUB04YdUptO81s+ozI3Ll5GCHTnv8NAm
+     - MQ_VHOST=test
+     - NOTLS=true
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+  s3:
+    command: server /data
+    container_name: s3
+    environment:
+      - MINIO_ACCESS_KEY=access
+      - MINIO_SECRET_KEY=secretkey
+    healthcheck:
+      test: ["CMD", "curl", "-fq", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+    image: minio/minio:RELEASE.2021-11-24T23-19-33Z
+    ports:
+      - "9000:9000"
+  createbucket:
+    image: minio/mc
+    container_name: mc
+    depends_on:
+      s3:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      /usr/bin/mc -q config host add s3 http://s3:9000 access secretkey;
+      /usr/bin/mc -q mb s3/inbox || true;
+      /usr/bin/mc -q mb s3/archive || true;
+      /usr/bin/mc -q mb s3/backup || true;
+      exit 0;
+      "
+  bootstrap:
+    depends_on:
+      createbucket:
+        condition: service_completed_successfully
+      mq:
+        condition: service_started
+      s3:
+        condition: service_started
+    command: sh -c /bin/bootstrap.sh -p /keys/c4gh.pub
+    container_name: bs
+    image: neicnordic/sda-helm-tests-support:latest
+    user: 0:0
+    volumes:
+      - $PWD/scripts/bootstrap.sh:/bin/bootstrap.sh
+      - keys:/keys
+volumes:
+  keys:
