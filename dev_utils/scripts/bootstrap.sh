@@ -92,7 +92,6 @@ for N in 1 2 3; do
 done
 
 # encrypt and upload files for user 2
-/tmp/crypt4gh generate -n user2 -p passwd2
 for N in 4 5 ; do
     yes | /tmp/crypt4gh encrypt -f file$N -p "$pubkey"
     "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N.c4gh" s3://inbox/user2/subpath/
