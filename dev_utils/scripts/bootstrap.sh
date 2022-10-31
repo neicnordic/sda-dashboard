@@ -88,7 +88,7 @@ for N in 1 2 3; do
         yes | /tmp/crypt4gh encrypt -f "file$N" -p "$pubkey"
     fi
     "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N.c4gh" s3://inbox/user1/
-    filePaths+=( "user1/file$N" )
+    filePaths+=( "user1/file$N.c4gh" )
 done
 
 # encrypt and upload files for user 2
@@ -96,16 +96,16 @@ done
 for N in 4 5 ; do
     yes | /tmp/crypt4gh encrypt -f file$N -p "$pubkey"
     "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N.c4gh" s3://inbox/user2/subpath/
-    filePaths+=( "user2/subpath/file$N" )
+    filePaths+=( "user2/subpath/file$N.c4gh" )
 done
 
 # trigger ingestion of uploaded files
 user="user1"
 for file in "${filePaths[@]} "; do
     f=$(basename "$file" | xargs )
-    MD5=$(md5sum "$f.c4gh" | cut -d ' ' -f1)
-    SHA=$(sha256sum "$f.c4gh" | cut -d ' ' -f1)
-    if [ "$f" == "file4" ];then
+    MD5=$(md5sum "$f" | cut -d ' ' -f1)
+    SHA=$(sha256sum "$f" | cut -d ' ' -f1)
+    if [ "$f" == "file4.c4gh" ];then
         user="user2"
     fi
     curl -s -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
