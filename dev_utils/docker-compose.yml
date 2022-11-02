@@ -1,5 +1,22 @@
 version: "3.7"
 services:
+  db:
+    command: server /data
+    container_name: db
+    environment:
+      - DB_LEGA_IN_PASSWORD=lega_in
+      - DB_LEGA_OUT_PASSWORD=lega_out
+      - NOTLS=true
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "lega_out"]
+      interval: 5s
+      timeout: 20s
+      retries: 3
+    image: neicnordic/sda-db:v1.4.14
+    ports:
+      - "5432:5432"
+    volumes:
+      - /tmp/data:/data
   mq:
     image: neicnordic/sda-mq:v1.4.13
     container_name: mq
@@ -17,19 +34,21 @@ services:
       timeout: 20s
       retries: 3
   s3:
-    command: server /data
+    command: server /data --console-address ":9001"
     container_name: s3
     environment:
       - MINIO_ACCESS_KEY=access
       - MINIO_SECRET_KEY=secretkey
+      - MINIO_SERVER_URL=http://127.0.0.1:9000
     healthcheck:
       test: ["CMD", "curl", "-fq", "http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 20s
       retries: 3
-    image: minio/minio:RELEASE.2021-11-24T23-19-33Z
+    image: minio/minio:RELEASE.2022-09-25T15-44-53Z
     ports:
       - "9000:9000"
+      - "9001:9001"
   createbucket:
     image: minio/mc
     container_name: mc
@@ -45,6 +64,146 @@ services:
       /usr/bin/mc -q mb s3/backup || true;
       exit 0;
       "
+  ingest:
+    command: sda-ingest
+    container_name: ingest
+    depends_on:
+      db:
+        condition: service_started
+      mq:
+        condition: service_started
+      s3:
+        condition: service_started
+    environment:
+      - ARCHIVE_TYPE=s3
+      - ARCHIVE_URL=http://s3
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=ingest
+      - BROKER_ROUTINGKEY=archived
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - INBOX_TYPE=s3
+      - INBOX_URL=http://s3
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+      - archive:/tmp
+    restart: always
+  verify:
+    command: sda-verify
+    container_name: verify
+    depends_on:
+      db:
+        condition: service_started
+      mq:
+        condition: service_started
+      s3:
+        condition: service_started
+    environment:
+      - ARCHIVE_URL=http://s3
+      - ARCHIVE_TYPE=s3
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=archived
+      - BROKER_ROUTINGKEY=verified
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - INBOX_TYPE=s3
+      - INBOX_URL=http://s3
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+      - archive:/tmp
+    restart: always
+  finalize:
+    command: sda-finalize
+    container_name: finalize
+    depends_on:
+      db:
+        condition: service_started
+      mq:
+        condition: service_started
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=accessionIDs
+      - BROKER_ROUTINGKEY=backup
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+    restart: always
+  backup:
+    command: sda-backup
+    container_name: backup
+    depends_on:
+      db:
+        condition: service_started
+      mq:
+        condition: service_started
+      s3:
+        condition: service_started
+    environment:
+      - ARCHIVE_TYPE=s3
+      - ARCHIVE_URL=http://s3
+      - BACKUP_TYPE=s3
+      - BACKUP_URL=http://s3
+      - BACKUP_LOCATION=/backup
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=backup
+      - BROKER_ROUTINGKEY=completed
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+      - archive:/tmp
+      - backup:/backup
+    restart: always
+  mapper:
+    command: sda-mapper
+    container_name: mapper
+    depends_on:
+      db:
+        condition: service_started
+      mq:
+        condition: service_started
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=mappings
+      - BROKER_ROUTINGERROR=error
+      - DB_HOST=db
+      - DB_USER=lega_out
+      - DB_PASSWORD=lega_out
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+    restart: always
+  interceptor:
+    command: sda-intercept
+    depends_on:
+      mq:
+        condition: service_started
+    environment:
+      - BROKER_EXCHANGE=sda
+      - BROKER_HOST=mq
+      - BROKER_QUEUE=files
+      - BROKER_ROUTINGKEY=ingest
+      - BROKER_ROUTINGERROR=error
+    image: neicnordic/sda-pipeline:latest
+    volumes:
+      - ./config.yaml:/config.yaml
+      - keys:/keys
+    restart: always
   bootstrap:
     depends_on:
       createbucket:
@@ -52,6 +211,8 @@ services:
       mq:
         condition: service_started
       s3:
+        condition: service_started
+      db:
         condition: service_started
     command: sh -c /bin/bootstrap.sh -p /keys/c4gh.pub
     container_name: bs
@@ -62,3 +223,5 @@ services:
       - keys:/keys
 volumes:
   keys:
+  archive:
+  backup:
