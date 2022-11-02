@@ -12,7 +12,10 @@ To start the services run
 ```sh
 docker-compose up
 ```
-This should start all the containers mentioned above and run the bootstrap script, which ingests two different datasets.
+This should start all the containers mentioned above and run the bootstrap script, which ingests two different datasets. Keep in mind that starting the services can take some time. You can follow the progress of the bootstrap script using
+```sh
+docker logs bs -f
+```
 
 ### Logging in Kibana
 The compose file contains elasticsearch, kibana and filebeat as part of the logging. The configuration of filebeat can be found in `filebeat.yml` file. In order to get the logs in kibana and grafana, go to kibana UI in a browser, at `localhost:5601` and create a new index under `Management`/`Index Patterns`. The name of the pattern should be `filebeat-*` and the Time Filter field name `@timestamp`. 
