@@ -78,6 +78,8 @@ services:
         condition: service_started
       s3:
         condition: service_started
+      bootstrap:
+        condition: service_started
     environment:
       - ARCHIVE_TYPE=s3
       - ARCHIVE_URL=http://s3
@@ -213,7 +215,7 @@ services:
       createbucket:
         condition: service_completed_successfully
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
       db:
