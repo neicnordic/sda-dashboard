@@ -37,6 +37,10 @@ services:
     command: server /data --console-address ":9001"
     container_name: s3
     environment:
+      - MINIO_NOTIFY_ELASTICSEARCH_ENABLE=on
+      - MINIO_NOTIFY_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - MINIO_NOTIFY_ELASTICSEARCH_INDEX=minio
+      - MINIO_NOTIFY_ELASTICSEARCH_FORMAT=namespace
       - MINIO_ACCESS_KEY=access
       - MINIO_SECRET_KEY=secretkey
       - MINIO_SERVER_URL=http://127.0.0.1:9000
@@ -71,8 +75,10 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
+        condition: service_started
+      bootstrap:
         condition: service_started
     environment:
       - ARCHIVE_TYPE=s3
@@ -98,7 +104,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
     environment:
@@ -125,7 +131,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
@@ -145,7 +151,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
     environment:
@@ -174,7 +180,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
@@ -192,7 +198,7 @@ services:
     command: sda-intercept
     depends_on:
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
@@ -209,7 +215,7 @@ services:
       createbucket:
         condition: service_completed_successfully
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
       db:
@@ -221,7 +227,37 @@ services:
     volumes:
       - $PWD/scripts/bootstrap.sh:/bin/bootstrap.sh
       - keys:/keys
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.16.3"
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.type=single-node"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.16.3"
+    ports:
+      - "5601:5601"
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      ELASTICSERCH_URL: http://elasticsearch:9200
+    volumes:
+      - grafana_data:/var/lib/grafana
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.16.3"
+    user: root
+    volumes:
+    - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    - /var/lib/docker:/var/lib/docker:ro
+    - /var/run/docker.sock:/var/run/docker.sock
 volumes:
+  grafana_data:
+  elasticsearch_data:
   keys:
   archive:
   backup:

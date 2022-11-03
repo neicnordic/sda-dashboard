@@ -100,7 +100,6 @@ done
 
 # trigger ingestion of uploaded files
 user="user1"
-dataset1=()
 stableids_user1=()
 stableids_user2=()
 for file in "${filePaths[@]} "; do
@@ -157,7 +156,7 @@ for file in "${filePaths[@]} "; do
         sleep 10
 		RETRY_TIMES=$((RETRY_TIMES + 1))
 
-		if [ "$RETRY_TIMES" -eq 10 ]; then
+		if [ "$RETRY_TIMES" -eq 5 ]; then
 			echo "Timed out waiting status ready in database"
 			break
 		fi
