@@ -12,6 +12,24 @@ To start the services run
 ```sh
 docker-compose up
 ```
+
+### Sanity checks
+
+#### Database
+If everything worked as it is supposed, there should be a number of files in the database. To check that this is the case, connecting to the database with
+```sh
+docker exec -it db /bin/bash
+```
+Inside the container run
+```sh
+psql -U lega_in -h localhost -p 5432 lega
+```
+and run the following query, which should return 4 results
+```sh
+select * from local_ega.main;
+```
+
+#### Filebeat
 Make sure that filebeat has started running
 ```sh
 docker logs dev_utils-filebeat-1
