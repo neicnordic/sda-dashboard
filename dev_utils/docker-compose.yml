@@ -75,7 +75,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
       bootstrap:
@@ -104,7 +104,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
     environment:
@@ -131,7 +131,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
@@ -151,7 +151,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
       s3:
         condition: service_started
     environment:
@@ -180,7 +180,7 @@ services:
       db:
         condition: service_started
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
@@ -198,7 +198,7 @@ services:
     command: sda-intercept
     depends_on:
       mq:
-        condition: service_started
+        condition: service_healthy
     environment:
       - BROKER_EXCHANGE=sda
       - BROKER_HOST=mq
