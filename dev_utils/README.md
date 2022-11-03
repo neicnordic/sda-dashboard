@@ -2,10 +2,10 @@
 
 The docker compose contains the followin services:
 - sda-db, sda-mq
-- minion (as S3 backend instance)
+- minio (as S3 backend instance)
 - sda-pipeline
 - logging (ELK stack and Grafana)
-- bootstrapt script
+- bootstrap script
 
 ## Start the services
 To start the services run
