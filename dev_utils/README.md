@@ -7,6 +7,7 @@ The docker compose contains the followin services:
 - logging (ELK stack and Grafana)
 - bootstrap script
 
+Notice that the db is using the newest version from [this pull request](https://github.com/neicnordic/sda-db/pull/56).
 ## Start the services
 To start the services run
 ```sh
@@ -36,8 +37,8 @@ docker logs dev_utils-filebeat-1
 ```
 In case filebeat doesn't start, it is possible that you need to change the owner and the permissions with
 ```sh
-sudo chown root filebeat.yaml
-sudo chmod go-w filebeat.yaml
+sudo chown root filebeat.yml
+sudo chmod go-w filebeat.yml
 ```
 This should start all the containers mentioned above and run the bootstrap script, which ingests two different datasets. Keep in mind that starting the services can take some time. You can follow the progress of the bootstrap script using
 ```sh
