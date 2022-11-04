@@ -7,6 +7,7 @@ services:
       - DB_LEGA_IN_PASSWORD=lega_in
       - DB_LEGA_OUT_PASSWORD=lega_out
       - NOTLS=true
+      - POSTGRES_PASSWORD=rootpass
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "localhost", "-U", "lega_out"]
       interval: 5s
@@ -246,7 +247,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      ELASTICSERCH_URL: http://elasticsearch:9200
+      - ELASTICSERCH_URL=http://elasticsearch:9200
+      - GF_SECURITY_ADMIN_PASSWORD=rootpass
     volumes:
       - grafana_data:/var/lib/grafana
   filebeat:

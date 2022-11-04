@@ -53,7 +53,7 @@ The compose file contains elasticsearch, kibana and filebeat as part of the logg
 Under the `Discover` tab, you should be able to see the logs for all containers using an image that starts with `sda-`.
 
 ### Grafana configuration
-Grafana gives the possibility to create different dashboards from different data sources. In this case, you can can create two dashboards in Grafana, one for the logs and one for the database. Login with `admin:admin` at `localhost:3000` and follow the instructions below to add the dashboards.
+Grafana gives the possibility to create different dashboards from different data sources. In this case, you can can create two dashboards in Grafana, one for the logs and one for the database. Login with `admin:rootpass` at `localhost:3000` and follow the instructions below to add the dashboards.
 
 #### Add sources
 There are two different sources that can be added in the Grafana instance, the elastic search (containing the logs) and the database (containing information about the files).
@@ -67,8 +67,8 @@ To add the Elasticsearch datasource, login to Grafana at `localhost:3000` and us
 To add the PostgreSQL datasource use the following:
 - Host: `db:5432`
 - Database: `lega`
-- User: `lega_in`
-- Password: `lega_in`
+- User: `postgres`
+- Password: `rotpass`
 - TLS/SSL Mode: `disable`
 
 Save and test both datasources.
