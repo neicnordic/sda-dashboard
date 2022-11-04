@@ -17,7 +17,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /tmp/data:/data
+      - dbdata:/var/lib/postgresql/data
   mq:
     image: neicnordic/sda-mq:v1.4.13
     container_name: mq
@@ -264,3 +264,4 @@ volumes:
   keys:
   archive:
   backup:
+  dbdata:
