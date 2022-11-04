@@ -72,10 +72,10 @@ if [ -z "$pubkey" ];then
         pubkey="/tmp/repo.pub.pem"
     fi
 fi
-
+timestamp="$(date +%s)"
 # create files
 for N in {1..5} ; do
-    dd if=/dev/urandom of="/tmp/file$N" bs="$RANDOM"k count=1
+    dd if=/dev/urandom of="/tmp/file$N-$timestamp" bs="$RANDOM"k count=1
 done
 
 filePaths=()
@@ -83,19 +83,19 @@ filePaths=()
 /tmp/crypt4gh generate -n user1 -p passwd1
 for N in 1 2 3; do
     if [ "$N" -eq 3 ];then
-        yes | /tmp/crypt4gh encrypt -f "file$N" -p user1.pub.pem
+        yes | /tmp/crypt4gh encrypt -f "file$N-$timestamp" -p user1.pub.pem
     else
-        yes | /tmp/crypt4gh encrypt -f "file$N" -p "$pubkey"
+        yes | /tmp/crypt4gh encrypt -f "file$N-$timestamp" -p "$pubkey"
     fi
-    "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N.c4gh" s3://inbox/user1/
-    filePaths+=( "user1/file$N.c4gh" )
+    "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N-$timestamp.c4gh" s3://inbox/user1/
+    filePaths+=( "user1/file$N-$timestamp.c4gh" )
 done
 
 # encrypt and upload files for user 2
 for N in 4 5 ; do
-    yes | /tmp/crypt4gh encrypt -f file$N -p "$pubkey"
-    "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N.c4gh" s3://inbox/user2/subpath/
-    filePaths+=( "user2/subpath/file$N.c4gh" )
+    yes | /tmp/crypt4gh encrypt -f "file$N-$timestamp" -p "$pubkey"
+    "$S3" -q --no-ssl --host="http://$s3host:9000" --host-bucket="http://$s3host:9000" --access_key="access" --secret_key="secretkey" put "file$N-$timestamp.c4gh" s3://inbox/user2/subpath/
+    filePaths+=( "user2/subpath/file$N-$timestamp.c4gh" )
 done
 
 # trigger ingestion of uploaded files
@@ -104,15 +104,16 @@ stableids_user1=()
 stableids_user2=()
 for file in "${filePaths[@]} "; do
     f=$(basename "$file" | xargs )
+    echo "#$f#"
     MD5=$(md5sum "$f" | cut -d ' ' -f1)
     SHA=$(sha256sum "$f" | cut -d ' ' -f1)
-    if [ "$f" == "file4.c4gh" ];then
+    if [ "$f" == "file4-$timestamp.c4gh" ];then
         user="user2"
     fi
     curl -s -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
     -H 'Content-Type: application/json;charset=UTF-8' \
     -d'{"vhost":"test","name":"sda","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files","payload_encoding":"string","payload":"{\"type\":\"ingest\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\",\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
-
+    sleep 5
     # Check that the ingested file showed up in the database
 	RETRY_TIMES=0
 	statusindb=''
