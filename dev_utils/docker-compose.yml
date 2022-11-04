@@ -247,7 +247,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      ELASTICSERCH_URL: http://elasticsearch:9200
+      - ELASTICSERCH_URL=http://elasticsearch:9200
       - GF_SECURITY_ADMIN_PASSWORD=rootpass
     volumes:
       - grafana_data:/var/lib/grafana
