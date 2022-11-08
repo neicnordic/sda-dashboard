@@ -2,6 +2,7 @@ apiVersion: 1
 
 datasources:
   - name: PostgreSQL
+    uid: postgresql-01
     type: postgres
     url: db:5432
     database: lega
@@ -12,6 +13,7 @@ datasources:
       password: "rootpass"
   - name: ElasticSearch
     type: elasticsearch
+    uid: elasticsearch-01
     access: proxy
     database: 'filebeat-*'
     url: http://elasticsearch:9200

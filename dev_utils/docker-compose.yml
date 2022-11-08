@@ -257,6 +257,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana-configs/grafana_data_sources.yaml:/etc/grafana/provisioning/datasources/grafana_data_sources.yaml
+      - ./grafana-configs/grafana_dashboard_config.yaml:/etc/grafana/provisioning/dashboards/grafana_dashboard_config.yaml
+      - ./grafana-configs/dashboards:/etc/dashboards
   filebeat:
     image: "docker.elastic.co/beats/filebeat:7.16.3"
     user: root
