@@ -547,6 +547,7 @@
           "custom": {
             "align": "auto",
             "displayMode": "auto",
+            "filterable": false,
             "inspect": false
           },
           "mappings": [],
@@ -574,6 +575,24 @@
               {
                 "id": "custom.width",
                 "value": 311
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Retry"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Test link",
+                    "url": "${__data.fields.Retry}"
+                  }
+                ]
               }
             ]
           }
@@ -606,9 +625,10 @@
           },
           "format": "table",
           "group": [],
+          "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  *\nFROM\n  local_ega.main\nwhere\n  submission_user in ($submitter) and status in ($file_status)",
+          "rawSql": "SELECT\n  ('http://localhost:8808/retry?id=' || stable_id) as \"Retry\", *\nFROM\n  local_ega.main\nwhere\n  submission_user in ($submitter) and status in ($file_status)",
           "refId": "A",
           "select": [
             [
@@ -631,6 +651,7 @@
         }
       ],
       "title": "Submitted files per submitter",
+      "transformations": [],
       "type": "table"
     }
   ],
@@ -641,7 +662,11 @@
   "templating": {
     "list": [
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"
@@ -660,7 +685,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"
@@ -679,7 +708,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"

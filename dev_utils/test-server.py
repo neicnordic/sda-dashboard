@@ -2,6 +2,7 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from json import dumps
+import re
 
 import psycopg2
 import uuid
@@ -30,20 +31,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._send_cors_headers()
         self.end_headers()
 
-        print("Will make a query")
+        ### This is your grand-dads url-parsing
+        res = re.search(r"id=([^&]+)", self.path)
+        if not res:
+            print("No match")
+            response = {"status": "Not Ok"}
+            self.send_dict_response(response)
 
-        conn = psycopg2.connect(
-            host="localhost",
-            port=5432,
-            database="lega",
-            user="postgres",
-            password="rootpass")
-
-        c = conn.cursor()
-        c.execute("""INSERT INTO sda.files (submission_user, submission_file_path) VALUES (%s, %s)""", ('userXX', '/userXX/sfeaads/' + str(uuid.uuid4())))
-        conn.commit()
-
-        print("Query done")
+        id_to_retry = res[1]
+        print(f"Will retry {id_to_retry}")
 
         response = {}
         response["status"] = "OK"
