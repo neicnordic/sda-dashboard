@@ -5,6 +5,7 @@ from json import dumps
 import re
 
 import psycopg2
+from psycopg2 import Error
 import uuid
 
 """ The HTTP request handler """
@@ -26,6 +27,36 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._send_cors_headers()
         self.end_headers()
 
+    def make_query(self, id):
+
+        try:
+            # Connect to an existing database
+            connection = psycopg2.connect(user="postgres",
+                                        password="rootpass",
+                                        host="db",
+                                        port="5432",
+                                        database="lega")
+
+            # Create a cursor to perform database operations
+            cursor = connection.cursor()
+            # Print PostgreSQL details
+            print("PostgreSQL server information")
+            print(connection.get_dsn_parameters(), "\n")
+            print("Something")
+            # Executing a SQL query
+            cursor.execute(f"SELECT submission_user FROM sda.files WHERE id = '{id}'")
+            user = cursor.fetchone()
+            cursor.execute("INSERT INTO sda.file_event_log (file_id, event, user_id) VALUES (%s, %s, %s)", (id, "uploaded", user))
+            connection.commit()
+
+        except (Exception, Error) as error:
+            print("Error while connecting to PostgreSQL", error)
+        finally:
+            if (connection):
+                cursor.close()
+                connection.close()
+                print("PostgreSQL connection is closed")
+        
     def do_GET(self):
         self.send_response(200)
         self._send_cors_headers()
@@ -40,6 +71,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         id_to_retry = res[1]
         print(f"Will retry {id_to_retry}")
+
+        self.make_query(res[1])
 
         response = {}
         response["status"] = "OK"
@@ -63,6 +96,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 print("Starting server")
 port = 8808
-httpd = HTTPServer(("127.0.0.1", port), RequestHandler)
+httpd = HTTPServer(("0.0.0.0", port), RequestHandler)
 print(f"Hosting server on port {port}")
 httpd.serve_forever()
