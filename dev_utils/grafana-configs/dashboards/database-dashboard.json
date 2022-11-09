@@ -31,7 +31,7 @@
     },
     {
       "type": "datasource",
-      "id": "postgresql-01",
+      "id": "postgres",
       "name": "PostgreSQL",
       "version": "1.0.0"
     },
@@ -54,6 +54,28 @@
       "version": ""
     }
   ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -293,7 +315,9 @@
         "x": 12,
         "y": 8
       },
+      "hideTimeOverride": false,
       "id": 10,
+      "interval": "1h",
       "options": {
         "legend": {
           "calcs": [],
@@ -313,22 +337,58 @@
             "uid": "postgresql-01"
           },
           "format": "time_series",
-          "group": [],
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "event"
+              ],
+              "type": "column"
+            }
+          ],
           "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  last_modified AS \"time\", count(*), status\nFROM\n  local_ega.main\ngroup by last_modified, status",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(started_at,$__interval),\n  event,\n  count(event) AS \"count\"\nFROM sda.file_event_log\nWHERE\n  $__timeFilter(started_at)\nGROUP BY 1, event\nORDER BY 1",
           "refId": "A",
           "select": [
             [
               {
                 "params": [
-                  "value"
+                  "event"
                 ],
                 "type": "column"
               }
+            ],
+            [
+              {
+                "params": [
+                  "event"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "alias"
+              }
             ]
           ],
-          "timeColumn": "time",
+          "table": "sda.file_event_log",
+          "timeColumn": "started_at",
+          "timeColumnType": "timestamptz",
           "where": [
             {
               "name": "$__timeFilter",
@@ -593,6 +653,22 @@
                     "url": "${__data.fields.Retry}"
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 463
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 49
               }
             ]
           }
@@ -628,7 +704,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  ('http://localhost:8808/retry?id=' || stable_id) as \"Retry\", *\nFROM\n  local_ega.main\nwhere\n  submission_user in ($submitter) and status in ($file_status)",
+          "rawSql": "SELECT\n  ('http://localhost:8808/retry?id=' || id) as \"Retry\", *\nFROM\n  sda.files\nwhere\n  submission_user in ($submitter)",
           "refId": "A",
           "select": [
             [
@@ -662,11 +738,7 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"
@@ -685,11 +757,7 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"
@@ -708,11 +776,7 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "postgres",
           "uid": "postgresql-01"
@@ -733,13 +797,13 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Database bashboard",
   "uid": "9VIaneNVz",
-  "version": 19,
+  "version": 1,
   "weekStart": ""
 }
