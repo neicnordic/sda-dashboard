@@ -81,17 +81,9 @@ message:*DEBUG* AND container.labels.com_docker_compose_service: "verify"
 ```
 
 ## How to add integrations to Grafana dashboard
-
-## Python test server
-
-One of the goals of the project is to be able to make requests from the Grafana dashboard towards the RabbitMQ and Postgres. Given the CORS issues with making requests straight to these services, a python test server is included in the project. To run the python server use
+One of the goals of the project is to be able to make requests from the Grafana dashboard towards the RabbitMQ and Postgres. Given the CORS issues with making requests straight to these services, a python test server is included in the project. The python server is part of the docker compose, but it can be started separately using
 ```sh
-python test-server.py
+docker compose up server
 ```
-The server currently contains an insert query to the database, therefore, it should be possible to call the server from Grafana and add files.
 
-### Future work
-Use different endpoints in the `test-server.py`, to allow for 
-- sending RabbitMQ messages
-- updating statuses in the database
-
+In order to create an integration using the python server, check the panel `Submitted files per submitter` under `Database dashboard`.
