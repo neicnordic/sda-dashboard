@@ -62,7 +62,7 @@
     {
       "datasource": {
         "type": "elasticsearch",
-        "uid": "${DS_ELASTICSEARCH}"
+        "uid": "elasticsearch-01"
       },
       "fieldConfig": {
         "defaults": {
@@ -145,7 +145,7 @@
           ],
           "datasource": {
             "type": "elasticsearch",
-            "uid": "${DS_ELASTICSEARCH}"
+            "uid": "elasticsearch-01"
           },
           "metrics": [
             {
