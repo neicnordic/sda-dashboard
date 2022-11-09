@@ -32,8 +32,8 @@ services:
     healthcheck:
       test: [ "CMD", "bash", "-c", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms"]
       interval: 5s
-      timeout: 20s
-      retries: 3
+      timeout: 120s
+      retries: 10
   s3:
     command: server /data --console-address ":9001"
     container_name: s3
