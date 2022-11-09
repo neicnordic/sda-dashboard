@@ -61,6 +61,10 @@ if [ ! "$S3" ] || [ "$(s3cmd --version | head -n1 | cut -d" " -f3 | sed 's/\.//g
     S3="/tmp/s3cmd-2.3.0/s3cmd"
 fi
 
+if [ -f "/keys/repo.pub.pem" ]; then
+    pubkey="/keys/repo.pub.pem"
+fi
+
 # create repository crypt4gh keys
 if [ -z "$pubkey" ];then
     echo "no public key supplied, creating repository key"
