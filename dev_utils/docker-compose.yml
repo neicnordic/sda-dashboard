@@ -266,6 +266,16 @@ services:
     - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     - /var/lib/docker:/var/lib/docker:ro
     - /var/run/docker.sock:/var/run/docker.sock
+  server:
+    image: test-server:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./test-server.py:/code/test-server.py
+
+    ports:
+    - "8808:8808"
 volumes:
   grafana_data:
   elasticsearch_data:
