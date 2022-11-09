@@ -62,6 +62,9 @@ Under dashboard (four rectangles on the left menu), select `+ Import` and then c
 
 Then you should be able to see the two dashboards. They contain one panel each with very simple queries, as samples. Feel free to add more panels and/or dashboards to fit your needs.
 
+#### Export and update dashboards
+The dashboards can be updated through the Grafana user interface and then be exported. To export the dashboard use the `share` button, select the `Export` tab and enable the `Export for sharing externally`. After downloading the file, make sure to replace all the instances of `${DS_POSTGRESQL}` with `postgresql-01`.
+
 #### Example dashboards
 Create a new dashboard for presenting the database information. One example could be to add a `table` in order to present the information of all files, using the following query:
 ```postgres
@@ -77,4 +80,18 @@ or to filter for a specific level of logs using a query like:
 message:*DEBUG* AND container.labels.com_docker_compose_service: "verify"
 ```
 
+## How to add integrations to Grafana dashboard
+
+## Python test server
+
+One of the goals of the project is to be able to make requests from the Grafana dashboard towards the RabbitMQ and Postgres. Given the CORS issues with making requests straight to these services, a python test server is included in the project. To run the python server use
+```sh
+python test-server.py
+```
+The server currently contains an insert query to the database, therefore, it should be possible to call the server from Grafana and add files.
+
+### Future work
+Use different endpoints in the `test-server.py`, to allow for 
+- sending RabbitMQ messages
+- updating statuses in the database
 
