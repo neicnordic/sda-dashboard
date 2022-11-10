@@ -21,6 +21,11 @@ services:
       interval: 5s
       timeout: 20s
       retries: 3
+  cegaresponce:
+    container_name: cega-response
+    build:
+      dockerfile: ./mock-cega/Dockerfile
+    image: mock-response
   db:
     command: server /data
     container_name: db
