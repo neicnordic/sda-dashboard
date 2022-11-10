@@ -81,6 +81,8 @@ services:
         condition: service_started
       bootstrap:
         condition: service_started
+      stepwiseboots:
+        condition: service_started
     environment:
       - ARCHIVE_TYPE=s3
       - ARCHIVE_URL=http://s3
@@ -221,8 +223,25 @@ services:
         condition: service_started
       db:
         condition: service_started
-    command: sh -c /bin/stepwiseboots.sh -p /keys/c4gh.pub
+    command: sh -c /bin/bootstrap.sh -p /keys/c4gh.pub
     container_name: bs
+    image: neicnordic/sda-helm-tests-support:latest
+    user: 0:0
+    volumes:
+      - $PWD/scripts/bootstrap.sh:/bin/bootstrap.sh
+      - keys:/keys
+  stepwiseboots:
+    depends_on:
+      createbucket:
+        condition: service_completed_successfully
+      mq:
+        condition: service_healthy
+      s3:
+        condition: service_started
+      db:
+        condition: service_started
+    command: tail -f /dev/null
+    container_name: stepwise
     image: neicnordic/sda-helm-tests-support:latest
     user: 0:0
     volumes:
