@@ -23,6 +23,9 @@ services:
       retries: 3
   cegaresponce:
     container_name: cega-response
+    depends_on:
+      cegamq:
+        condition: service_healthy
     build:
       dockerfile: ./mock-cega/Dockerfile
     image: mock-response
