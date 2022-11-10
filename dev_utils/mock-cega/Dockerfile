@@ -1,0 +1,13 @@
+FROM golang:1.16-alpine
+WORKDIR /source
+
+COPY ./mock-cega/go.mod ./
+COPY ./mock-cega/go.sum ./
+
+RUN go mod download
+
+COPY ./mock-cega/response.go ./
+
+RUN CGO_ENABLED=0 go build -o /bin/cega-response
+
+CMD [ "/bin/cega-response" ]
