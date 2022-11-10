@@ -791,6 +791,23 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "Submission Path"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "",
+                    "url": "${__data.fields.Info}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Info"
             },
             "properties": [
