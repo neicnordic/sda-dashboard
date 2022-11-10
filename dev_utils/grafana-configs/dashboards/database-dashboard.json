@@ -143,7 +143,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  local_ega.main.*\nFROM\n  local_ega.main\nJOIN\n  local_ega_ebi.filedataset on filedataset.file_id = local_ega.main.id\nWHERE\n  filedataset.dataset_stable_id in ($dataset) and local_ega.main.submission_user in ($submitter)\n",
+          "rawSql": "select submission_user as \"Submitter\",\n       submission_file_path as \"Submission Path\",\n       char_length(archive_file_path) > 0 as \"Archived\",\n       backup_path IS NOT NULL as \"Backuped\",\n       event as \"Status\",\n       files.stable_id as \"EGA ID\",\n       datasets.stable_id as \"EGA Dataset\",\n       checkup.checksum as \"Uploaded Checksum\",\n       checkun.checksum as \"Unencyprted Checksum\",\n       started_at as \"Last change\"\nfrom sda.files left join sda.file_event_log\n     on (files.id = file_event_log.file_id \n         and file_event_log.id = (\n            select _f.id \n            from sda.file_event_log \n            as _f \n            where _f.file_id=file_event_log.file_id\n            order by _f.id desc limit 1))\n      left join sda.file_dataset on (files.id = file_dataset.file_id)\n      left join sda.datasets on (file_dataset.dataset_id = datasets.id)\n      left join sda.checksums as checkup on ( checkup.file_id = files.id and checkup.source = 'UPLOADED' )\n      left join sda.checksums as checkun on ( checkun.file_id = files.id and checkun.source = 'UNENCRYPTED' )\nwhere\n  submission_user in ($submitter)\n  and datasets.stable_id in ($dataset);\n",
           "refId": "A",
           "select": [
             [
