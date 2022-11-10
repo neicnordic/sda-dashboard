@@ -55,7 +55,7 @@ func inboxpub(body []byte, corrid string, channel *amqp.Channel) {
 
 func main() {
 	// Connect to the mock cega server
-	conn, err := amqp.Dial("amqp://test:test@localhost:5671/lega")
+	conn, err := amqp.Dial("amqp://test:test@cegamq:5672/lega")
 	failOnError(err, "Failed to connect to CEGA MQ")
 	defer conn.Close()
 
