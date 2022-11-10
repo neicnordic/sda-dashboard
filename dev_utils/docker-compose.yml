@@ -1,5 +1,26 @@
 version: "3.7"
 services:
+  cegamq:
+    container_name: cegamq
+    image: rabbitmq:3.11.2-management-alpine
+    environment:
+      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/conf/cega
+      - RABBITMQ_ENABLED_PLUGINS_FILE=/etc/rabbitmq/conf/cega.plugins
+    ports:
+      - "15673:15671"
+    volumes:
+      - ./mock-cega:/etc/rabbitmq/conf
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms"
+        ]
+      interval: 5s
+      timeout: 20s
+      retries: 3
   db:
     command: server /data
     container_name: db
@@ -21,7 +42,11 @@ services:
   mq:
     image: neicnordic/sda-mq:v1.4.13
     container_name: mq
+    depends_on:
+      cegamq:
+        condition: service_healthy
     environment:
+     - CEGA_CONNECTION=amqp://test:test@cegamq:5672/lega
      - MQ_USER=test
      - MQ_PASSWORD_HASH=C5ufXbYlww6ZBcEqDUB04YdUptO81s+ozI3Ll5GCHTnv8NAm
      - MQ_VHOST=test
