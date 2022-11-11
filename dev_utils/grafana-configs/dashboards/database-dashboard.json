@@ -24,12 +24,6 @@
       "version": "9.2.3"
     },
     {
-      "type": "panel",
-      "id": "piechart",
-      "name": "Pie chart",
-      "version": ""
-    },
-    {
       "type": "datasource",
       "id": "postgres",
       "name": "PostgreSQL",
@@ -116,7 +110,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 24,
         "x": 0,
         "y": 0
@@ -196,10 +190,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 12,
+        "w": 2,
         "x": 0,
-        "y": 8
+        "y": 10
       },
       "id": 6,
       "options": {
@@ -263,242 +257,6 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
-      "id": 4,
-      "options": {
-        "displayLabels": [
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true,
-          "values": []
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "9.2.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "postgresql-01"
-          },
-          "format": "table",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  count(*), status\nFROM\n  local_ega.main\ngroup by status\n\n",
-          "refId": "A",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "column"
-              }
-            ]
-          ],
-          "timeColumn": "time",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Status of files",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "postgresql-01"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "displayMode": "auto",
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "file_id"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 314
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "submission_file_path"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 300
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "hideTimeOverride": false,
-      "id": 10,
-      "interval": "1h",
-      "options": {
-        "footer": {
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "9.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "postgresql-01"
-          },
-          "format": "time_series",
-          "group": [
-            {
-              "params": [
-                "$__interval",
-                "none"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "event"
-              ],
-              "type": "column"
-            }
-          ],
-          "metricColumn": "none",
-          "rawQuery": false,
-          "rawSql": "SELECT\n  $__timeGroupAlias(started_at,$__interval),\n  event,\n  count(event) AS \"count\"\nFROM sda.file_event_log\nWHERE\n  $__timeFilter(started_at)\nGROUP BY 1, event\nORDER BY 1",
-          "refId": "A",
-          "select": [
-            [
-              {
-                "params": [
-                  "event"
-                ],
-                "type": "column"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "event"
-                ],
-                "type": "column"
-              },
-              {
-                "params": [
-                  "count"
-                ],
-                "type": "aggregate"
-              },
-              {
-                "params": [
-                  "count"
-                ],
-                "type": "alias"
-              }
-            ]
-          ],
-          "table": "sda.file_event_log",
-          "timeColumn": "started_at",
-          "timeColumnType": "timestamptz",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Recently Ingested Files",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "postgresql-01"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -533,10 +291,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 28
+        "h": 12,
+        "w": 5,
+        "x": 2,
+        "y": 10
       },
       "id": 8,
       "options": {
@@ -652,12 +410,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 28
+        "h": 12,
+        "w": 17,
+        "x": 7,
+        "y": 10
       },
+      "hideTimeOverride": false,
       "id": 10,
+      "interval": "5m",
       "options": {
         "legend": {
           "calcs": [],
@@ -677,22 +437,58 @@
             "uid": "postgresql-01"
           },
           "format": "time_series",
-          "group": [],
+          "group": [
+            {
+              "params": [
+                "$__interval",
+                "none"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "event"
+              ],
+              "type": "column"
+            }
+          ],
           "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  last_modified AS \"time\", count(*), status\nFROM\n  local_ega.main\ngroup by last_modified, status",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  $__timeGroupAlias(started_at,$__interval),\n  event,\n  count(event) AS \"count\"\nFROM sda.file_event_log\nWHERE\n  $__timeFilter(started_at)\nGROUP BY 1, event\nORDER BY 1",
           "refId": "A",
           "select": [
             [
               {
                 "params": [
-                  "value"
+                  "event"
                 ],
                 "type": "column"
               }
+            ],
+            [
+              {
+                "params": [
+                  "event"
+                ],
+                "type": "column"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "aggregate"
+              },
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "alias"
+              }
             ]
           ],
-          "timeColumn": "time",
+          "table": "sda.file_event_log",
+          "timeColumn": "started_at",
+          "timeColumnType": "timestamptz",
           "where": [
             {
               "name": "$__timeFilter",
@@ -702,7 +498,7 @@
           ]
         }
       ],
-      "title": "Count pipeline status",
+      "title": "Count Pipeline Status",
       "type": "timeseries"
     },
     {
@@ -820,10 +616,10 @@
         ]
       },
       "gridPos": {
-        "h": 12,
+        "h": 14,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 22
       },
       "id": 2,
       "options": {
