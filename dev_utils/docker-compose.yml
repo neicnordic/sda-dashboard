@@ -221,7 +221,7 @@ services:
         condition: service_started
       db:
         condition: service_started
-    command: sh -c "tail -f /dev/null"
+    command: sh -c initcontainer.sh
     container_name: stepwise
     image: neicnordic/sda-helm-tests-support:latest
     user: 0:0
