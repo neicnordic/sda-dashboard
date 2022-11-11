@@ -9,14 +9,33 @@ authors:
   - name: Johan Viklund
     orcid: 0000-0003-1984-8522
     affiliation: 1
-  - name: Next person
-    orcid: XXX
+  - name: Dimitris Bampalikis
+    affiliation: 1
+    orcid: 
+  - name: Silvia Bahena
     affiliation: 2
+    orcid: 
+  - name: Marcos Casado Barbero
+    affiliation: 2
+    orcid: 
+  - name: Betül Eren Keskin
+    affiliation: 3
+    orcid: 
+  - name: Shreyas Shivakumara
+    affiliation: 3
+    orcid: 
+  - name: Joshua Baskaran
+    affiliation: 4
+    orcid: 
 affiliations:
   - name: Uppsala University, ICM, blabla
     index: 1
-  - name: Database Center for Life Science, Research Organization of Information and Systems, Japan
+  - name: CRG???
     index: 2
+  - name: Linköping
+    index: 3
+  - name: Norway
+    index: 4
 date: 11 Nov 2022
 cito-bibliography: paper.bib
 event: BioHackEU22
@@ -47,100 +66,50 @@ pasting above link (or yours) in
 
 # Introduction
 
-The countries Finland, Sweden, Norway, Denmark and Estonia are collaborating in
-the NeIC Heilsa project to develop software and operate federated EGA nodes. We
-want to bring developers from all partnering countries together to work on an
-operator dashboard for our software stack.
+Human genome and phenom data is classified as special categories under the EU
+GDPR legislation and this requires special care to be taken when re-using this
+data. To enable this in a compliant way the Federated EGA was established in
+2022[TODO citation]. The Federated EGA is built on top of the already existing
+European Genome/Phenome Arcive (EGA). The nordic countries, Norway, Finland and
+Sweden together with Spain and Germany represent the first federated partners.
 
-As we move into a mature operational ecosystem there is a need for both System
+In the nordics we have collaborated around a codebase for the federated EGA, we
+have done this under the umbrella of the Nordic e-Infrastructure Collaboration
+(NeIC)[TODO citation] where we've had three projects over the last 7 years,
+Tryggve[CITE], Tryggve2[CITE] and now Heilsa[CITE].
+
+As we in the nordics now move into production there is a need for both System
 Administrators and Helpdesk staff to be able to control and inspect the system.
 We need to answer questions related to operations, identify errors in order to
 better manage the services and infrastructure. To standardize the workflow with
 the operator dashboard we aim to build an MVP for such an “Operator Dashboard”.
-There will be a view on the sensitive data archive that will provide Helpdesk
-with means to identify issues such as number of submissions per user, failed
-submission and the reason, or how many times a dataset has been accessed,
-accession identifiers for datasets and their associated files etc. For system
-admins the main objective is to have means to trace errors and investigate
-failed submissions or to spot issues related to downloading/accessing
-datasets/files. We also want to have the ability to modify and retry failed
-jobs and make safe manual updates to specific database fields.
-
-We have not implemented any dashboard or control interfaces before and we hope
-that by bringing this project to the hackathon we can get input from people in
-different organizations on best practices for design and what we might not have
-thought about for the dashboard.
-
 
 # Results
 
 ## Grafana dashboard
 
+We used grafana[TODO: cite] to create a Minimal Viable Product (MVP) of a
+dashboard to view the state and interact with system.
 
+There are two main views into the system. The first one is an overview over all
+files and what state they are in, whether they have been moved from the inbox,
+if they've been backed up and if they have gotten the EGAF identifiers from
+Central EGA[TODO: cite], see Figure 1. It is possible from this view to also
+click on a file to go to the second view with information about all events that
+has happened to that specific file, to aid the helpdesk staff in the task of
+supporting the submitting researcher, see Figure 2.
 
-The following tasks were accomplished as part of the BioHackathon:
+We also made a proof-of-concept of controlling the system through the
+dashboard. It's possible to click on a "Retry" link and then the state of a
+file changes from whatever it is already in to "Uploaded" instead, we didn't
+have enough time to also restart the ingestion pipeline.
 
-\begin{enumerate}
-\item Represent datasets and their related metadata
-\item Represent family and pedigree information to support clinical knowledge
-\item Make the provenance model more rich and descriptive
-\end{enumerate}
-
-(note the list is written in embedded LaTeX)
-
-# Discussion
+# Future Work
 
 
 ## Acknowledgements
 
-We thank the organisers of the BioHackathon-Europe 2022 for travel support for some of the authors.
-
-
-## Tables and figures
-
-Tables can be added in the following way, though alternatives are possible:
-
-| Header 1 | Header 2 |
-| -------- | -------- |
-| item 1 | item 2 |
-| item 3 | item 4 |
-
-Table: Note that table caption is automatically numbered.
-
-
-| Term                | MB tools/ontologies using this term | Frequency on Biology Stack Exchange | Search Term         |
-|:-------------------:|:-----------------------------------:|:-----------------------------------:|:-------------------:|
-| Part | iGEM | 9065 | part + parts |
-| Component           | SBOL, SBOLDesigner, SBOLCanvas      | 2163                                | component           |
-| Module              | SBOL                                | 311                                 | module              |
-| Device              |                                     | 677                                 | device              |
-| System              |                                     | 16098                               | system              |
-| RBS                 |                                     | 548                                 | rbs                 |
-| Ribosome Entry Site | SO                                  | 8                                   | ribosome entry site |
-
-LaTeX table:
-
-
-
-\begin{tabular}{|l|l|}\hline
-Age & Frequency \\ \hline
-18--25  & 15 \\
-26--35  & 33 \\
-36--45  & 22 \\ \hline
-\end{tabular}
-
-## Mermaid graphs
-
-This is an example of embedding a graph
-
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-```
-
-Unfortunately it does not work without the mermaid plugin and that requires headless chrome(?!). If you run the command line version of `gen-pdf` it may be possible to get it to work with the right packages. Please tell us if you succeed.
+We thank the organisers of the BioHackathon-Europe 2022 for travel support for
+some of the authors.
 
 ## References
