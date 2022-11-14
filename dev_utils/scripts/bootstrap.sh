@@ -2,11 +2,13 @@
 
 mqhost="mq"
 s3host="s3"
+cegahost="cegamq"
 
 if [ ! -f /.dockerenv ]; then
     echo "I'm loose in the world!";
     mqhost="localhost"
     s3host="localhost"
+    cegahost="localhost"
 fi
 
 get=""
@@ -114,9 +116,9 @@ for file in "${filePaths[@]} "; do
     if [ "$f" == "file4-$timestamp.c4gh" ];then
         user="user2"
     fi
-    curl -s -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
+    curl -s -u test:test "$cegahost:15671/api/exchanges/lega/localega.v1/publish" \
     -H 'Content-Type: application/json;charset=UTF-8' \
-    -d'{"vhost":"test","name":"sda","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files","payload_encoding":"string","payload":"{\"type\":\"ingest\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\",\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
+    -d'{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files.inbox","payload_encoding":"string","payload":"{\"type\":\"ingest\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\"},{\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
     sleep 5
     # Check that the ingested file showed up in the database
 	RETRY_TIMES=0
