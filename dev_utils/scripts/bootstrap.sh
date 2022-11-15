@@ -149,11 +149,6 @@ for file in "${filePaths[@]} "; do
     # Create random accession id
     access=$(printf "EGAF%05d%06d" "$RANDOM" "$count")
 
-    # Start finalize
-    curl -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
-    -H 'Content-Type: application/json;charset=UTF-8' \
-    --data-binary '{"vhost":"test","name":"sda","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files","payload_encoding":"string","payload":"{\"type\":\"accession\",\"user\":\"'"$user"'\",\"filepath\":\"'"$file"'\",\"accession_id\":\"'"$access"'\",\"decrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$decrypted_sha"'\"},{\"type\":\"md5\",\"value\":\"'"$decrypted_md5"'\"}]}"}'
-
     # Check in the DB that the file got stable_id
     RETRY_TIMES=0
     stableid=''
