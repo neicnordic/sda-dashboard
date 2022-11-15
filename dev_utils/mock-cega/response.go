@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"math/rand"
+	"strconv"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,8 +17,28 @@ func failOnError(err error, msg string) {
 	}
 }
 
+// Function for generating accession ids
+func generateAccession() string {
+	egaInt := 12000000000 + rand.Intn(200)
+	strNumber := strconv.Itoa(egaInt)
+	accessionID := "EGAF" + strNumber
+	return accessionID
+}
+
+// Fuction for consuming the messages in the queue
+func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue string) {
+	// Check the queue for messages
+	for delivered := range msgs {
+		//TODO: add json validation before calling the function
+		log.Printf("Received a message from %v queue: %s", queue, delivered.Body)
+		sendMessage(delivered.Body, delivered.CorrelationId, channel, queue)
+	}
+}
+
 // Function for sending message to the file queue
-func inboxpub(body []byte, corrid string, channel *amqp.Channel) {
+// Message from inbox queue: adds the type only and returns the new message
+// Message from verified queue: adds type and accession id and returns the new message
+func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string) {
 	var message map[string]interface{}
 
 	// Unmarshal the message
@@ -24,8 +46,14 @@ func inboxpub(body []byte, corrid string, channel *amqp.Channel) {
 	err := json.Unmarshal(body, &message)
 	failOnError(err, "Failed to unmarshal the message")
 
-	// Add the type in the received message
-	message["type"] = "ingest"
+	// Add the type in the received message depending on the queue
+	if queue == "inbox" {
+		message["type"] = "ingest"
+	} else {
+		message["type"] = "accession"
+		accessionid := generateAccession()
+		message["accession_id"] = accessionid
+	}
 
 	// Marshal the new body where the type is included
 	newbody, err := json.Marshal(message)
@@ -51,6 +79,27 @@ func inboxpub(body []byte, corrid string, channel *amqp.Channel) {
 			Body:            []byte(newbody),
 		})
 	failOnError(err, "Failed to publish a message")
+	log.Printf("Send a message from %v queue to files: %s", queue, []byte(newbody))
+}
+
+// This function is using a channel to get the messages from a given queue
+// and returns the messages
+func messages(queue string, channel *amqp.Channel) <-chan amqp.Delivery {
+	queueFullname := "v1.files." + queue
+	log.Printf("Consuming messages from %v queue", queueFullname)
+	// Receive messages from the files.inbox queue
+	messages, err := channel.Consume(
+		queueFullname, // queue
+		"",            // consumer
+		true,          // auto-ack
+		false,         // exclusive
+		false,         // no-local
+		false,         // no-wait
+		nil,           // args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	return messages
 }
 
 func main() {
@@ -64,29 +113,19 @@ func main() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	// Receive messages from the files.inbox queue
-	messages, err := ch.Consume(
-		"v1.files.inbox", // queue
-		"",               // consumer
-		true,             // auto-ack
-		false,            // exclusive
-		false,            // no-local
-		false,            // no-wait
-		nil,              // args
-	)
-	failOnError(err, "Failed to register a consumer")
+	// Queues that are checked for messages
+	queues := []string{"inbox", "verified"}
 
 	var forever chan struct{}
 
-	go func() {
-		// Check the queue for messages
-		for delivered := range messages {
-			//TODO: add json validation before calling the function
-			log.Printf("Received a message: %s", delivered.Body)
-			inboxpub(delivered.Body, delivered.CorrelationId, ch)
-		}
-	}()
+	// Loop over the given queues
+	for _, queue := range queues {
+		// Get the message from the queue
+		msgs := messages(queue, ch)
 
+		// Consume messages from specific queue
+		go consumeFromQueue(msgs, ch, queue)
+	}
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
 }
