@@ -18,11 +18,17 @@ func failOnError(err error, msg string) {
 }
 
 // Function for generating accession ids
-func generateAccession() string {
-	egaInt := 12000000000 + rand.Intn(200)
+func generateIds(queue string) string {
+	egaInt := 12000000000 + rand.Intn(1000)
 	strNumber := strconv.Itoa(egaInt)
-	accessionID := "EGAF" + strNumber
-	return accessionID
+	id := ""
+	if queue == "verified" {
+		id = "EGAF" + strNumber
+		//EGAD00123456780
+	} else {
+		id = "EGAD" + strNumber
+	}
+	return id
 }
 
 // Fuction for consuming the messages in the queue
@@ -36,8 +42,9 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 }
 
 // Function for sending message to the file queue
-// Message from inbox queue: adds the type only and returns the new message
-// Message from verified queue: adds type and accession id and returns the new message
+// Message from inbox queue: adds the type only
+// Message from verified queue: adds type and accession id
+// Message from stableIDs queue: adds type and dataset id
 func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string) {
 	var message map[string]interface{}
 
@@ -49,10 +56,14 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 	// Add the type in the received message depending on the queue
 	if queue == "inbox" {
 		message["type"] = "ingest"
-	} else {
+	} else if queue == "verified" {
 		message["type"] = "accession"
-		accessionid := generateAccession()
+		accessionid := generateIds(queue)
 		message["accession_id"] = accessionid
+	} else {
+		message["type"] = "mapping"
+		datasetid := generateIds(queue)
+		message["dataset_id"] = datasetid
 	}
 
 	// Marshal the new body where the type is included
@@ -85,7 +96,12 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 // This function is using a channel to get the messages from a given queue
 // and returns the messages
 func messages(queue string, channel *amqp.Channel) <-chan amqp.Delivery {
-	queueFullname := "v1.files." + queue
+	queueFullname := ""
+	if queue == "stableIDs" {
+		queueFullname = "v1." + queue
+	} else {
+		queueFullname = "v1.files." + queue
+	}
 	log.Printf("Consuming messages from %v queue", queueFullname)
 	// Receive messages from the files.inbox queue
 	messages, err := channel.Consume(
@@ -114,7 +130,7 @@ func main() {
 	defer ch.Close()
 
 	// Queues that are checked for messages
-	queues := []string{"inbox", "verified"}
+	queues := []string{"inbox", "verified", "stableIDs"}
 
 	var forever chan struct{}
 
