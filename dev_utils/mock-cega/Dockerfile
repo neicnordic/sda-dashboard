@@ -8,6 +8,6 @@ RUN go mod download
 
 COPY ./mock-cega/response.go ./
 
-RUN CGO_ENABLED=0 go build -o /bin/cega-response
+RUN CGO_ENABLED=0 go build -o /bin/mock-cega
 
-CMD [ "/bin/cega-response" ]
+CMD [ "/bin/mock-cega" ]
