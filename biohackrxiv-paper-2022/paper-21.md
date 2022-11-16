@@ -1,6 +1,6 @@
 ---
 title: 'Operator dashboard for controlling the NeIC Sensitive Data Archive'
-title_short: 'Operator dashboard for the NeIC Sensitive Data Archive'
+title_short: 'Operator dashboard for NeIC SDA'
 tags:
   - dashboard
   - grafana
@@ -66,30 +66,32 @@ pasting above link (or yours) in
 
 # Introduction
 
-Human genome and phenom data is classified as special categories under the EU
-GDPR legislation and this requires special care to be taken when re-using this
-data. To enable this in a compliant way the Federated EGA was established in
-2022[TODO citation]. The Federated EGA is built on top of the already existing
-European Genome/Phenome Arcive (EGA). The nordic countries, Norway, Finland and
-Sweden together with Spain and Germany represent the first federated partners.
+Human genome and phenome data is classified as special categories under the EU
+GDPR legislation and this requires special care to be taken when using and
+re-using this data for research. To enable this in a compliant way the
+Federated EGA was established in 2022[TODO citation]. The Federated EGA is
+built on top of the already existing European Genome/Phenome Arcive (EGA). The
+nordic countries, Norway, Finland and Sweden together with Spain and Germany
+represent the first federated partners.
 
-In the nordics we have collaborated around a codebase for the federated EGA, we
-have done this under the umbrella of the Nordic e-Infrastructure Collaboration
-(NeIC)[TODO citation] where we've had three projects over the last 7 years,
-Tryggve[CITE], Tryggve2[CITE] and now Heilsa[CITE].
+In the nordics we have collaborated around our own implementation for our
+federated EGA nodes, we have done this under the umbrella of the Nordic
+e-Infrastructure Collaboration (NeIC)[TODO citation] where we've had three
+projects over the last 7 years, Tryggve[CITE], Tryggve2[CITE] and now
+Heilsa[CITE].
 
 As we in the nordics now move into production there is a need for both System
 Administrators and Helpdesk staff to be able to control and inspect the system.
 We need to answer questions related to operations, identify errors in order to
-better manage the services and infrastructure. To standardize the workflow with
-the operator dashboard we aim to build an MVP for such an “Operator Dashboard”.
+better manage the services and infrastructure. To standardize this workflow and
+make the system easier to use we decided to build an MVP for such an “Operator
+Dashboard” during the Elixir Biohackathon 2022.
 
 # Results
 
-## Grafana dashboard
-
 We used grafana[TODO: cite] to create a Minimal Viable Product (MVP) of a
-dashboard to view the state and interact with system.
+dashboard to view the current state of the systema and to give some simple
+interaction points with system.
 
 There are two main views into the system. The first one is an overview over all
 files and what state they are in, whether they have been moved from the inbox,
@@ -106,6 +108,20 @@ have enough time to also restart the ingestion pipeline.
 
 # Future Work
 
+The dashboard needs to be integrated into the production system so we can try
+it out with actual data. The interaction with the system is in a pre-alpha
+demonstrator state and will have to be removed before deploying to production.
+There's also an open question whether it's a good idea to preload the
+dashboards in the way that is currently done in the docker-compose or if that
+makes editing of the dashboards too complicated.
+
+We also aim to test this dashboard on our own internal helpdesk staff to see
+whether our assumptions about what they want to see holds true.
+
+It was also quite useful for the development team working with the code-base
+and deployments as they could more easily see what's going on in the system so
+extending this with a few more developer focused views wou==ill probably be a
+good idea.
 
 ## Acknowledgements
 
