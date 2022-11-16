@@ -106,8 +106,6 @@ done
 
 # trigger ingestion of uploaded files
 user="user1"
-stableids_user1=()
-stableids_user2=()
 for file in "${filePaths[@]} "; do
     f=$(basename "$file" | xargs )
     echo "#$f#"
@@ -120,34 +118,6 @@ for file in "${filePaths[@]} "; do
     -H 'Content-Type: application/json;charset=UTF-8' \
     -d'{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files.inbox","payload_encoding":"string","payload":"{\"type\":\"ingest\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\"},{\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
     sleep 5
-    # Check that the ingested file showed up in the database
-	RETRY_TIMES=0
-	statusindb=''
-	until [ -n "$statusindb" ]; do
-		statusindb=$(PGPASSWORD=lega_in psql -h db -U lega_in lega -t -A -c "SELECT id FROM local_ega.main where submission_file_path='$file' AND status='COMPLETED';")
-		echo "Waiting to find id in DB"
-        sleep 10
-		RETRY_TIMES=$((RETRY_TIMES + 1))
-
-		if [ "$RETRY_TIMES" -eq 5 ]; then
-			echo "Timed out waiting correct status in database, aborting"
-			break
-		fi
-	done
-    # In case the file does not appear in the DB
-    # continue with the next one
-    if [ "$statusindb" = "" ]; then
-        continue
-    fi
-
-    # Calculate checksums of the decrypted file
-    suffix=".c4gh"
-    decrfile=${f%$suffix}
-    decrypted_sha=$(sha256sum "$decrfile" | cut -d ' ' -f1)
-    decrypted_md5=$(md5sum "$decrfile" | cut -d ' ' -f1)
-
-    # Create random accession id
-    access=$(printf "EGAF%05d%06d" "$RANDOM" "$count")
 
     # Check in the DB that the file got stable_id
     RETRY_TIMES=0
@@ -169,31 +139,26 @@ for file in "${filePaths[@]} "; do
     if [ "$stableid" = "" ]; then
         continue
     fi
-
-    # Add stable_ids in a list for each user
-    if [ "$user" = "user1" ]; then
-        stableids_user1+=("\\\"$access\\\"")
-    else
-        stableids_user2+=("\\\"$access\\\"")
-    fi
 done
 
-# Start mapping for user 1
-echo "Mapping started for user 1"
-printf -v ids_user1 ',%s' "${stableids_user1[@]}"
-ids_user1=${ids_user1:1}
+# Start mapping for users
+users=("user1" "user2")
+for user in "${users[@]}"; do
+    echo "Mapping started for $user"
+    ids_list=()
+    pgids=$(PGPASSWORD=lega_in psql -h db -U lega_in lega -t -A -c "SELECT stable_id FROM local_ega.main where submission_user='$user' AND status='READY';")
+    ids_list+=($pgids)
 
-curl -vvv -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
--H 'Content-Type: application/json;charset=UTF-8' \
---data-binary '{"vhost":"test","name":"sda","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files","payload_encoding":"string","payload":"{\"type\":\"mapping\",\"dataset_id\":\"EGAD00123456780\",\"accession_ids\":['"$ids_user1"']}"}'
-echo "Mapping is done for user 1"
+    # Modify the query results for use in curl
+    ids_list=(${ids_list[@]/#/'\"'})
+    ids_list=(${ids_list[@]/%/'\"'})
+    printf -v ids_user ',%s' "${ids_list[@]}"
+    ids_user=${ids_user:1}
 
-# Start mapping for user 2
-echo "Mapping started for user 2"
-printf -v ids_user2 ',%s' "${stableids_user2[@]}"
-ids_user2=${ids_user2:1}
+    # Send message to mock cega with the list of stable ids
+    curl -vvv -u test:test "$cegahost:15671/api/exchanges/lega/localega.v1/publish" \
+    -H 'Content-Type: application/json;charset=UTF-8' \
+    --data-binary '{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"stableIDs","payload_encoding":"string","payload":"{\"accession_ids\":['"$ids_user"']}"}'
 
-curl -vvv -u test:test "$mqhost:15672/api/exchanges/test/sda/publish" \
--H 'Content-Type: application/json;charset=UTF-8' \
---data-binary '{"vhost":"test","name":"sda","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files","payload_encoding":"string","payload":"{\"type\":\"mapping\",\"dataset_id\":\"EGAD00123456790\",\"accession_ids\":['"$ids_user2"']}"}'
-echo "Mapping is done for user 2"
+    echo "Mapping is done for $user"
+done
