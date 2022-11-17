@@ -263,7 +263,47 @@ services:
     volumes:
       - $PWD/scripts/bootstrap.sh:/bin/bootstrap.sh
       - keys:/keys
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.16.3"
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.type=single-node"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.16.3"
+    ports:
+      - "5601:5601"
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+    ports:
+      - "3000:3000"
+    environment:
+      - ELASTICSERCH_URL=http://elasticsearch:9200
+      - GF_SECURITY_ADMIN_PASSWORD=rootpass
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-configs/grafana_data_sources.yaml:/etc/grafana/provisioning/datasources/grafana_data_sources.yaml
+      - ./grafana-configs/grafana_dashboard_config.yaml:/etc/grafana/provisioning/dashboards/grafana_dashboard_config.yaml
+      - ./grafana-configs/dashboards:/etc/dashboards
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.16.3"
+    user: root
+    volumes:
+    - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    - /var/lib/docker:/var/lib/docker:ro
+    - /var/run/docker.sock:/var/run/docker.sock
 volumes:
+  grafana_data:
+  elasticsearch_data:
   keys:
   archive:
   backup:
