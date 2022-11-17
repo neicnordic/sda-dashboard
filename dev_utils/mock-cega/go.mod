@@ -1,4 +1,4 @@
-module cega-response
+module mock-cega
 
 go 1.19
 

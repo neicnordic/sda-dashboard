@@ -24,7 +24,6 @@ func generateIds(queue string) string {
 	id := ""
 	if queue == "verified" {
 		id = "EGAF" + strNumber
-		//EGAD00123456780
 	} else {
 		id = "EGAD" + strNumber
 	}
