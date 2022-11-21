@@ -11,6 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	users      []string
+	onemessage []interface{}
+)
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
@@ -30,8 +35,86 @@ func generateIds(queue string) string {
 	return id
 }
 
+// Function for checking if a string exists in an array
+func contains(list []string, str string) bool {
+	for _, value := range list {
+		if value == str {
+			return true
+		}
+	}
+	return false
+}
+
+// Function for getting all the messages from the "completed" queue
+// and create one message with all of them included
+func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
+	// Consume messages from the queue and create one message
+	for delivered := range msgs {
+		var message map[string]interface{}
+
+		err := json.Unmarshal(delivered.Body, &message)
+		failOnError(err, "Failed to unmarshal the message")
+		log.Printf("Received a message from completed queue: %s", delivered.Body)
+
+		// Append the delivered message to the one big message
+		onemessage = append(onemessage, message)
+
+		// Check if the user exists in the the users list and if
+		// it is not then add the user
+		exists := contains(users, message["user"].(string))
+		if !exists {
+			users = append(users, message["user"].(string))
+		}
+
+		// When the number of messages received from the "completed" queue
+		// is equal to the number we want then create the new messages for mapping
+		if len(onemessage) == 3 {
+			dataSetMsgs(onemessage, users, channel, delivered.CorrelationId)
+		}
+	}
+}
+
+// Function for creating messages for mapping from the one big message.
+// The number of the new messages is equal to the number of different
+// users (the same dataset id will be given to all files that this user uploaded)
+func dataSetMsgs(unMarBody []interface{}, users []string, channel *amqp.Channel, corrid string) {
+	// Loop over the array of different users
+	for _, user := range users {
+		message := make(map[string]interface{})
+		var ids []string
+		// Loop through all the messages and add in an array all the accessions ids
+		// from the user
+		for _, dataset := range unMarBody {
+			ds := dataset.(map[string]interface{})
+			if user == ds["user"] {
+				ids = append(ids, ds["accession_id"].(string))
+			}
+		}
+
+		// Create a dataset id
+		datasetID := generateIds("completed")
+
+		// Add the necessary info to the new message
+		message["type"] = "mapping"
+		message["dataset_id"] = datasetID
+		message["accession_ids"] = ids
+
+		// Marshal the new body whith all the information
+		createdBody, err := json.Marshal(message)
+		failOnError(err, "Failed to marshal the new message for mapping")
+
+		// Send the message to the files queue
+		go sendMessage(createdBody, corrid, channel, "completed")
+	}
+}
+
 // Fuction for consuming the messages in the queue
 func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue string) {
+	// For "completed" queue do not consume every incoming message.
+	// Wait until all the messages are in the queue
+	if queue == "completed" {
+		getAllMessages(msgs, channel)
+	}
 	// Check the queue for messages
 	for delivered := range msgs {
 		//TODO: add json validation before calling the function
@@ -41,40 +124,47 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 }
 
 // Function for sending message to the file queue
-// Message from inbox queue: adds the type only
-// Message from verified queue: adds type and accession id
-// Message from stableIDs queue: adds type and dataset id
+//   - If the message comes with queue name "completed" then it is
+//     already modified ready so no further information is needed.
+//   - If the message comes from inbox queue: only the type is added.
+//   - If the message comes from verified queue: type and accession id are added
+//   - If the message comes from stableIDs queue: type and dataset id are added
 func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string) {
-	var message map[string]interface{}
+	var newBody []byte
+	if queue != "completed" {
+		var message map[string]interface{}
 
-	// Unmarshal the message
-	// TODO: remove the error if json validation is implemented
-	err := json.Unmarshal(body, &message)
-	failOnError(err, "Failed to unmarshal the message")
+		// Unmarshal the message
+		// TODO: remove the error if json validation is implemented
+		err := json.Unmarshal(body, &message)
+		failOnError(err, "Failed to unmarshal the message")
 
-	// Add the type in the received message depending on the queue
-	if queue == "inbox" {
-		message["type"] = "ingest"
-	} else if queue == "verified" {
-		message["type"] = "accession"
-		accessionid := generateIds(queue)
-		message["accession_id"] = accessionid
+		// Add the type in the received message depending on the queue
+		if queue == "inbox" {
+			message["type"] = "ingest"
+		} else if queue == "verified" {
+			message["type"] = "accession"
+			accessionid := generateIds(queue)
+			message["accession_id"] = accessionid
+		} else if queue == "stableIDs" {
+			message["type"] = "mapping"
+			datasetid := generateIds(queue)
+			message["dataset_id"] = datasetid
+		}
+
+		// Marshal the new body where the type is included
+		newBody, err = json.Marshal(message)
+		failOnError(err, "Failed to marshal the new message")
 	} else {
-		message["type"] = "mapping"
-		datasetid := generateIds(queue)
-		message["dataset_id"] = datasetid
+		newBody = body
 	}
-
-	// Marshal the new body where the type is included
-	newbody, err := json.Marshal(message)
-	failOnError(err, "Failed to marshal the new message")
 
 	// Maybe move the context to the main
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Publish message to the files queue
-	err = channel.PublishWithContext(ctx,
+	err := channel.PublishWithContext(ctx,
 		"localega.v1", // exchange
 		"files",       // routing key
 		false,         // mandatory
@@ -86,10 +176,10 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 			DeliveryMode:    amqp.Persistent,
 			CorrelationId:   corrid,
 			Priority:        0, // 0-9
-			Body:            []byte(newbody),
+			Body:            []byte(newBody),
 		})
 	failOnError(err, "Failed to publish a message")
-	log.Printf("Send a message from %v queue to files: %s", queue, []byte(newbody))
+	log.Printf("Send a message from %v queue to files: %s", queue, []byte(newBody))
 }
 
 // This function is using a channel to get the messages from a given queue
@@ -129,7 +219,7 @@ func main() {
 	defer ch.Close()
 
 	// Queues that are checked for messages
-	queues := []string{"inbox", "verified", "stableIDs"}
+	queues := []string{"inbox", "verified", "completed"}
 
 	var forever chan struct{}
 
