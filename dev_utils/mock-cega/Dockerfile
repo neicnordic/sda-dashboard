@@ -6,7 +6,7 @@ COPY ./mock-cega/go.sum ./
 
 RUN go mod download
 
-COPY ./mock-cega/response.go ./
+COPY ./mock-cega/mockcega.go ./
 
 RUN CGO_ENABLED=0 go build -o /bin/mock-cega
 
