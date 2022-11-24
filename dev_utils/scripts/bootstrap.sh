@@ -116,7 +116,7 @@ for file in "${filePaths[@]} "; do
     fi
     curl -s -u test:test "$cegahost:15671/api/exchanges/lega/localega.v1/publish" \
     -H 'Content-Type: application/json;charset=UTF-8' \
-    -d'{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files.inbox","payload_encoding":"string","payload":"{\"type\":\"ingest\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\"},{\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
+    -d'{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"files.inbox","payload_encoding":"string","payload":"{\"operation\":\"upload\",\"user\":\"'$user'\",\"filepath\":\"'"$file"'\",\"encrypted_checksums\":[{\"type\":\"sha256\",\"value\":\"'"$SHA"'\"},{\"type\":\"md5\",\"value\":\"'"$MD5"'\"}]}"}'
     sleep 5
 
     # Check in the DB that the file got stable_id
