@@ -141,6 +141,8 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 
 		// Add the type in the received message depending on the queue
 		if queue == "inbox" {
+			delete(message, "filesize")
+			delete(message, "operation")
 			message["type"] = "ingest"
 		} else if queue == "verified" {
 			message["type"] = "accession"
