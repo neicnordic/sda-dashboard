@@ -30,12 +30,13 @@ services:
       dockerfile: ./mock-cega/Dockerfile
     image: mock-cega
     environment:
-    - COMPLETED_MESSAGES=3
-    - MQ_VHOST=lega
     - MOCKHOST=cegamq
+    - MQ_VHOST=lega
     - MQ_USER=test
     - MQ_PASSWORD=test
     - MQ_PORT=5672
+    - CEGA_RESPONSE=ingest accessionid mapping
+    - COMPLETED_MESSAGES=3
   db:
     command: server /data
     container_name: db

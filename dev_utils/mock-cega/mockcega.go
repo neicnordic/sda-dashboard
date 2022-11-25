@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -22,6 +23,7 @@ var (
 type config struct {
 	mockhost string
 	messages int
+	queues   string
 	vhost    string
 	user     string
 	password string
@@ -32,6 +34,25 @@ func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
 	}
+}
+
+// Function for creating the list of queues that will be checked for messages
+func usedQueues() []string {
+	var q []string
+	// check if should send message for ingestion, accession ids or dataset ids
+	if strings.Contains(conf.queues, "ingest") {
+		q = append(q, "inbox")
+	}
+
+	if strings.Contains(conf.queues, "accessionid") {
+		q = append(q, "verified")
+	}
+
+	if strings.Contains(conf.queues, "mapping") {
+		q = append(q, "completed")
+	}
+
+	return q
 }
 
 // Function for returning the values of
@@ -46,6 +67,7 @@ func envVal() {
 	conf.user = viper.GetString("MQ_USER")
 	conf.password = viper.GetString(("MQ_PASSWORD"))
 	conf.port = viper.GetString("MQ_PORT")
+	conf.queues = viper.GetString("CEGA_RESPONSE")
 	//return c
 }
 
@@ -251,7 +273,7 @@ func main() {
 	defer ch.Close()
 
 	// Queues that are checked for messages
-	queues := []string{"inbox", "verified", "completed"}
+	queues := usedQueues()
 
 	var forever chan struct{}
 
