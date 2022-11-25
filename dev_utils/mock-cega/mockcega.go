@@ -3,23 +3,50 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 var (
 	users      []string
 	onemessage []interface{}
+	conf       config
 )
+
+type config struct {
+	mockhost string
+	messages int
+	vhost    string
+	user     string
+	password string
+	port     string
+}
 
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
 	}
+}
+
+// Function for returning the values of
+// enviroment variables in config type
+// TODO: Add errors for missing env vars
+func envVal() {
+	//var c config
+	viper.AutomaticEnv()
+	conf.messages = viper.GetInt("COMPLETED_MESSAGES")
+	conf.mockhost = viper.GetString("MOCKHOST")
+	conf.vhost = viper.GetString("MQ_VHOST")
+	conf.user = viper.GetString("MQ_USER")
+	conf.password = viper.GetString(("MQ_PASSWORD"))
+	conf.port = viper.GetString("MQ_PORT")
+	//return c
 }
 
 // Function for generating accession ids
@@ -68,7 +95,7 @@ func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
 
 		// When the number of messages received from the "completed" queue
 		// is equal to the number we want then create the new messages for mapping
-		if len(onemessage) == 3 {
+		if len(onemessage) == conf.messages {
 			dataSetMsgs(onemessage, users, channel, delivered.CorrelationId)
 		}
 	}
@@ -210,8 +237,11 @@ func messages(queue string, channel *amqp.Channel) <-chan amqp.Delivery {
 }
 
 func main() {
+	// Get the values from the environment
+	envVal()
 	// Connect to the mock cega server
-	conn, err := amqp.Dial("amqp://test:test@cegamq:5672/lega")
+	cegaMQ := fmt.Sprintf("amqp://%s:%s@%s:%s/%s", conf.user, conf.password, conf.mockhost, conf.port, conf.vhost)
+	conn, err := amqp.Dial(cegaMQ)
 	failOnError(err, "Failed to connect to CEGA MQ")
 	defer conn.Close()
 
