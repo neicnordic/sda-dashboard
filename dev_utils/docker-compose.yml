@@ -37,6 +37,7 @@ services:
     - MQ_PORT=5672
     - CEGA_RESPONSE=ingest accessionid mapping
     - COMPLETED_MESSAGES=3
+    - DATASETID=user #user, filepath, manual, all
   db:
     command: server /data
     container_name: db

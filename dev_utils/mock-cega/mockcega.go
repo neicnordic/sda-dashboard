@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,9 +16,9 @@ import (
 )
 
 var (
-	users      []string
-	onemessage []interface{}
-	conf       config
+	datasetGroups []string
+	onemessage    []interface{}
+	conf          config
 )
 
 type config struct {
@@ -28,6 +29,7 @@ type config struct {
 	user     string
 	password string
 	port     string
+	dataset  string
 }
 
 func failOnError(err error, msg string) {
@@ -49,7 +51,11 @@ func usedQueues() []string {
 	}
 
 	if strings.Contains(conf.queues, "mapping") {
-		q = append(q, "completed")
+		if conf.dataset == "manual" {
+			q = append(q, "stableIDs")
+		} else {
+			q = append(q, "completed")
+		}
 	}
 
 	return q
@@ -59,7 +65,6 @@ func usedQueues() []string {
 // enviroment variables in config type
 // TODO: Add errors for missing env vars
 func envVal() {
-	//var c config
 	viper.AutomaticEnv()
 	conf.messages = viper.GetInt("COMPLETED_MESSAGES")
 	conf.mockhost = viper.GetString("MOCKHOST")
@@ -68,7 +73,7 @@ func envVal() {
 	conf.password = viper.GetString(("MQ_PASSWORD"))
 	conf.port = viper.GetString("MQ_PORT")
 	conf.queues = viper.GetString("CEGA_RESPONSE")
-	//return c
+	conf.dataset = viper.GetString("DATASETID")
 }
 
 // Function for generating accession ids
@@ -108,35 +113,48 @@ func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
 		// Append the delivered message to the one big message
 		onemessage = append(onemessage, message)
 
-		// Check if the user exists in the the users list and if
-		// it is not then add the user
-		exists := contains(users, message["user"].(string))
+		// Check if the datasetType(user or filepath) exists in the datasetGroups list and if
+		// it is not then add it
+		var datasetType string
+		if conf.dataset == "user" {
+			datasetType = message[conf.dataset].(string)
+		} else {
+			// Get only the directory of the filepath
+			datasetType = filepath.Dir(message[conf.dataset].(string))
+		}
+		exists := contains(datasetGroups, datasetType)
 		if !exists {
-			users = append(users, message["user"].(string))
+			datasetGroups = append(datasetGroups, datasetType)
 		}
 
 		// When the number of messages received from the "completed" queue
 		// is equal to the number we want then create the new messages for mapping
 		if len(onemessage) == conf.messages {
-			dataSetMsgs(onemessage, users, channel, delivered.CorrelationId)
+			dataSetMsgs(onemessage, datasetGroups, channel, delivered.CorrelationId)
 		}
 	}
 }
 
 // Function for creating messages for mapping from the one big message.
 // The number of the new messages is equal to the number of different
-// users (the same dataset id will be given to all files that this user uploaded)
-func dataSetMsgs(unMarBody []interface{}, users []string, channel *amqp.Channel, corrid string) {
-	// Loop over the array of different users
-	for _, user := range users {
+// datasetGroups (the same dataset id will be given to all files that this user uploaded)
+func dataSetMsgs(unMarBody []interface{}, datasetGrps []string, channel *amqp.Channel, corrid string) {
+	// Loop over the array of different datasetGrps
+	for _, dG := range datasetGrps {
 		message := make(map[string]interface{})
 		var ids []string
 		// Loop through all the messages and add in an array all the accessions ids
-		// from the user
+		// from the datasetGroup
 		for _, dataset := range unMarBody {
 			ds := dataset.(map[string]interface{})
-			if user == ds["user"] {
+			if conf.dataset == "user" && dG == ds["user"] {
 				ids = append(ids, ds["accession_id"].(string))
+			} else if conf.dataset == "filepath" {
+				// Get only the directory of the filepath
+				fpath := filepath.Dir(ds["filepath"].(string))
+				if dG == fpath {
+					ids = append(ids, ds["accession_id"].(string))
+				}
 			}
 		}
 
@@ -159,9 +177,10 @@ func dataSetMsgs(unMarBody []interface{}, users []string, channel *amqp.Channel,
 
 // Fuction for consuming the messages in the queue
 func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue string) {
-	// For "completed" queue do not consume every incoming message.
+	// For "completed" queue do not consume every incoming message
+	// unless is desirable for every file to have different dataset id.
 	// Wait until all the messages are in the queue
-	if queue == "completed" {
+	if queue == "completed" && conf.dataset != "all" {
 		getAllMessages(msgs, channel)
 	}
 	// Check the queue for messages
@@ -172,15 +191,13 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 	}
 }
 
-// Function for sending message to the file queue
-//   - If the message comes with queue name "completed" then it is
-//     already modified ready so no further information is needed.
-//   - If the message comes from inbox queue: only the type is added.
-//   - If the message comes from verified queue: type and accession id are added
-//   - If the message comes from stableIDs queue: type and dataset id are added
+// Function for sending message to the file queue.
+// Modify messages in a way that are not failing the validation in pipeline
 func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string) {
 	var newBody []byte
-	if queue != "completed" {
+	if queue == "completed" && conf.dataset != "all" {
+		newBody = body
+	} else {
 		var message map[string]interface{}
 
 		// Unmarshal the message
@@ -189,6 +206,7 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		failOnError(err, "Failed to unmarshal the message")
 
 		// Add the type in the received message depending on the queue
+		// and remove al the unwanted information
 		if queue == "inbox" {
 			delete(message, "filesize")
 			delete(message, "operation")
@@ -197,7 +215,10 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 			message["type"] = "accession"
 			accessionid := generateIds(queue)
 			message["accession_id"] = accessionid
-		} else if queue == "stableIDs" {
+		} else if queue == "stableIDs" || queue == "completed" {
+			delete(message, "decrypted_checksums")
+			delete(message, "filepath")
+			delete(message, "user")
 			message["type"] = "mapping"
 			datasetid := generateIds(queue)
 			message["dataset_id"] = datasetid
@@ -206,8 +227,6 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		// Marshal the new body where the type is included
 		newBody, err = json.Marshal(message)
 		failOnError(err, "Failed to marshal the new message")
-	} else {
-		newBody = body
 	}
 
 	// Maybe move the context to the main
