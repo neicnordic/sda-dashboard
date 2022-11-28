@@ -140,25 +140,3 @@ for file in "${filePaths[@]} "; do
         continue
     fi
 done
-
-# Start mapping for users
-users=("user1" "user2")
-for user in "${users[@]}"; do
-    echo "Mapping started for $user"
-    ids_list=()
-    pgids=$(PGPASSWORD=lega_in psql -h db -U lega_in lega -t -A -c "SELECT stable_id FROM local_ega.main where submission_user='$user' AND status='READY';")
-    ids_list+=($pgids)
-
-    # Modify the query results for use in curl
-    ids_list=(${ids_list[@]/#/'\"'})
-    ids_list=(${ids_list[@]/%/'\"'})
-    printf -v ids_user ',%s' "${ids_list[@]}"
-    ids_user=${ids_user:1}
-
-    # Send message to mock cega with the list of stable ids
-    curl -vvv -u test:test "$cegahost:15671/api/exchanges/lega/localega.v1/publish" \
-    -H 'Content-Type: application/json;charset=UTF-8' \
-    --data-binary '{"vhost":"lega","name":"localega.v1","properties":{"delivery_mode":2,"correlation_id":"1","content_encoding":"UTF-8","content_type":"application/json"},"routing_key":"stableIDs","payload_encoding":"string","payload":"{\"accession_ids\":['"$ids_user"']}"}'
-
-    echo "Mapping is done for $user"
-done
