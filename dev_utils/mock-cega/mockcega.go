@@ -197,7 +197,10 @@ func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
 		var message map[string]interface{}
 
 		err := json.Unmarshal(delivered.Body, &message)
-		failOnError(err, "Failed to unmarshal the message")
+		if err != nil {
+			log.Errorf("Failed to unmarshal the message. Error: %v", err)
+		}
+
 		log.Printf("Received a message from completed queue: %s", delivered.Body)
 
 		// Append the delivered message to the one big message
@@ -258,7 +261,9 @@ func dataSetMsgs(unMarBody []interface{}, datasetGrps []string, channel *amqp.Ch
 
 		// Marshal the new body whith all the information
 		createdBody, err := json.Marshal(message)
-		failOnError(err, "Failed to marshal the new message for mapping")
+		if err != nil {
+			log.Errorf("Failed to marshal the message. Error: %v", err)
+		}
 
 		// Send the message to the files queue
 		go sendMessage(createdBody, corrid, channel, "completed")
@@ -359,7 +364,9 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 
 		// Marshal the new body where the type is included
 		newBody, err = json.Marshal(message)
-		failOnError(err, "Failed to marshal the new message")
+		if err != nil {
+			log.Errorf("Failed to marshal the message. Error: %v", err)
+		}
 	}
 
 	// Maybe move the context to the main
