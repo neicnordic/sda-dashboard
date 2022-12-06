@@ -199,6 +199,7 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		newBody = body
 	} else {
 		var message map[string]interface{}
+		var accessionIDS []string
 
 		// Unmarshal the message
 		// TODO: remove the error if json validation is implemented
@@ -206,7 +207,7 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		failOnError(err, "Failed to unmarshal the message")
 
 		// Add the type in the received message depending on the queue
-		// and remove al the unwanted information
+		// and remove all the unwanted information
 		if queue == "inbox" {
 			delete(message, "filesize")
 			delete(message, "operation")
@@ -216,12 +217,15 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 			accessionid := generateIds(queue)
 			message["accession_id"] = accessionid
 		} else if queue == "stableIDs" || queue == "completed" {
-			delete(message, "decrypted_checksums")
-			delete(message, "filepath")
-			delete(message, "user")
 			message["type"] = "mapping"
 			datasetid := generateIds(queue)
 			message["dataset_id"] = datasetid
+			accessionIDS = append(accessionIDS, message["accession_id"].(string))
+			message["accession_ids"] = accessionIDS
+			delete(message, "decrypted_checksums")
+			delete(message, "filepath")
+			delete(message, "user")
+			delete(message, "accession_id")
 		}
 
 		// Marshal the new body where the type is included
