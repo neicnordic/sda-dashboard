@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 var (
@@ -30,6 +32,94 @@ type config struct {
 	password string
 	port     string
 	dataset  string
+}
+
+type ingest struct {
+	Operation          string      `json:"operation"`
+	Type               string      `json:"type"`
+	User               string      `json:"user"`
+	Filepath           string      `json:"filepath"`
+	EncryptedChecksums []checksums `json:"encrypted_checksums"`
+}
+
+type verify struct {
+	User               string      `json:"user"`
+	Filepath           string      `json:"filepath"`
+	DecryptedChecksums []checksums `json:"decrypted_checksums"`
+}
+
+type mapping struct {
+	User               string      `json:"user"`
+	Filepath           string      `json:"filepath"`
+	AccessionID        string      `json:"accession_id"`
+	DecryptedChecksums []checksums `json:"decrypted_checksums"`
+}
+
+type checksums struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+// Function for validating JSON body, verifying that it is a valid JSON
+// according to the given schema type
+func ValidateJSON(delivered *amqp.Delivery,
+	jsonSchema string,
+	body []byte,
+	msg interface{}) error {
+	res, err := validateJSON(jsonSchema, body)
+
+	if err != nil {
+		log.Errorf("JSON error while validating "+
+			"(corr-id: %s, error: %v, message body: %s)",
+			delivered.CorrelationId,
+			err,
+			body)
+
+		return err
+	}
+
+	if !res.Valid() {
+
+		errorString := ""
+
+		for _, validErr := range res.Errors() {
+			errorString += validErr.String() + "\n\n"
+		}
+
+		log.Errorf("Error(s) while schema validation "+
+			"(corr-id: %s, error: %s)",
+			delivered.CorrelationId,
+			errorString)
+		log.Error("Validation failed")
+
+		return fmt.Errorf("Errors while validating JSON %s", errorString)
+	}
+
+	if msg == nil {
+		// Skip unmarshalling test
+		return nil
+	}
+
+	d := json.NewDecoder(bytes.NewBuffer(body))
+	d.DisallowUnknownFields()
+	err = d.Decode(msg)
+
+	if err != nil {
+
+		log.Errorf("Error while unmarshalling JSON "+
+			"(corr-id: %s, error: %v, message body: %s)",
+			delivered.CorrelationId,
+			err,
+			body)
+	}
+
+	return err
+}
+
+func validateJSON(schemaName string, body []byte) (*gojsonschema.Result, error) {
+	schema := gojsonschema.NewReferenceLoader("file:///schemas/" + schemaName)
+	res, err := gojsonschema.Validate(schema, gojsonschema.NewBytesLoader(body))
+	return res, err
 }
 
 func failOnError(err error, msg string) {
@@ -175,6 +265,30 @@ func dataSetMsgs(unMarBody []interface{}, datasetGrps []string, channel *amqp.Ch
 	}
 }
 
+// Function for getting the schema type and name
+// which depends on the queue
+func schemaForValidation(queue string) (string, interface{}) {
+	jsonSchm := ""
+	var message interface{}
+	var ingestMsg ingest
+	var verifyMsg verify
+	var mappMsg mapping
+
+	switch queue {
+	case "inbox":
+		message = ingestMsg
+		jsonSchm = "inbox-upload.json"
+	case "verified":
+		message = verifyMsg
+		jsonSchm = "ingestion-accession-request.json"
+	case "stableIDs", "completed":
+		message = mappMsg
+		jsonSchm = "ingestion-completion.json"
+	}
+
+	return jsonSchm, message
+}
+
 // Fuction for consuming the messages in the queue
 func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue string) {
 	// For "completed" queue do not consume every incoming message
@@ -183,10 +297,24 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 	if queue == "completed" && conf.dataset != "all" {
 		getAllMessages(msgs, channel)
 	}
+
+	// Schema type and name that will be used for the validation
+	schema, msg := schemaForValidation(queue)
 	// Check the queue for messages
 	for delivered := range msgs {
-		//TODO: add json validation before calling the function
 		log.Printf("Received a message from %v queue: %s", queue, delivered.Body)
+		err := ValidateJSON(&delivered,
+			schema,
+			delivered.Body,
+			&msg)
+
+		if err != nil {
+			log.Errorf("Validation of incoming message failed "+
+				"(corr-id: %s, error: %v)",
+				delivered.CorrelationId,
+				err)
+			continue
+		}
 		sendMessage(delivered.Body, delivered.CorrelationId, channel, queue)
 	}
 }
@@ -202,9 +330,10 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		var accessionIDS []string
 
 		// Unmarshal the message
-		// TODO: remove the error if json validation is implemented
 		err := json.Unmarshal(body, &message)
-		failOnError(err, "Failed to unmarshal the message")
+		if err != nil {
+			log.Errorf("Failed to unmarshal the message. Error: %v", err)
+		}
 
 		// Add the type in the received message depending on the queue
 		// and remove all the unwanted information
