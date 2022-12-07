@@ -195,6 +195,7 @@ func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
 	// Consume messages from the queue and create one message
 	for delivered := range msgs {
 		var message map[string]interface{}
+		var mappMsg mapping
 
 		err := json.Unmarshal(delivered.Body, &message)
 		if err != nil {
@@ -202,6 +203,19 @@ func getAllMessages(msgs <-chan amqp.Delivery, channel *amqp.Channel) {
 		}
 
 		log.Printf("Received a message from completed queue: %s", delivered.Body)
+
+		err = ValidateJSON(&delivered,
+			"ingestion-completion.json",
+			delivered.Body,
+			&mappMsg)
+
+		if err != nil {
+			log.Errorf("Validation of incoming message failed "+
+				"(corr-id: %s, error: %v)",
+				delivered.CorrelationId,
+				err)
+			continue
+		}
 
 		// Append the delivered message to the one big message
 		onemessage = append(onemessage, message)
@@ -308,6 +322,7 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 	// Check the queue for messages
 	for delivered := range msgs {
 		log.Printf("Received a message from %v queue: %s", queue, delivered.Body)
+
 		err := ValidateJSON(&delivered,
 			schema,
 			delivered.Body,
