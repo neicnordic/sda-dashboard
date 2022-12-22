@@ -285,8 +285,8 @@ func dataSetMsgs(unMarBody []interface{}, datasetGrps []string, channel *amqp.Ch
 }
 
 // Function for getting the schema type and name
-// which depends on the queue
-func schemaForValidation(queue string) (string, interface{}) {
+// which depends on the queueschemaFor
+func schemaForValidation(queue string, body []byte) (string, interface{}) {
 	jsonSchm := ""
 	var message interface{}
 	var ingestMsg ingest
@@ -296,7 +296,15 @@ func schemaForValidation(queue string) (string, interface{}) {
 	switch queue {
 	case "inbox":
 		message = ingestMsg
-		jsonSchm = "inbox-upload.json"
+		// Check if the message is "upload" or "remove"
+		// and return the correct schema
+		var checkMsg map[string]interface{}
+		_ = json.Unmarshal(body, &checkMsg)
+		if checkMsg["operation"] == "remove" {
+			jsonSchm = "inbox-remove.json"
+		} else {
+			jsonSchm = "inbox-upload.json"
+		}
 	case "verified":
 		message = verifyMsg
 		jsonSchm = "ingestion-accession-request.json"
@@ -317,11 +325,12 @@ func consumeFromQueue(msgs <-chan amqp.Delivery, channel *amqp.Channel, queue st
 		getAllMessages(msgs, channel)
 	}
 
-	// Schema type and name that will be used for the validation
-	schema, msg := schemaForValidation(queue)
 	// Check the queue for messages
 	for delivered := range msgs {
 		log.Printf("Received a message from %v queue: %s", queue, delivered.Body)
+
+		// Schema type and name that will be used for the validation
+		schema, msg := schemaForValidation(queue, delivered.Body)
 
 		err := ValidateJSON(&delivered,
 			schema,
@@ -358,9 +367,14 @@ func sendMessage(body []byte, corrid string, channel *amqp.Channel, queue string
 		// Add the type in the received message depending on the queue
 		// and remove all the unwanted information
 		if queue == "inbox" {
+			if message["operation"] == "remove" {
+				message["type"] = "cancel"
+				delete(message, "encrypted_checksums")
+			} else {
+				message["type"] = "ingest"
+			}
 			delete(message, "filesize")
 			delete(message, "operation")
-			message["type"] = "ingest"
 		} else if queue == "verified" {
 			message["type"] = "accession"
 			accessionid := generateIds(queue)
