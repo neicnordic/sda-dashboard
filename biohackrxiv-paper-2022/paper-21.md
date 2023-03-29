@@ -77,8 +77,8 @@ represent the first federated partners.
 In the nordics we have collaborated around our own implementation for our
 federated EGA nodes, we have done this under the umbrella of the Nordic
 e-Infrastructure Collaboration (NeIC)[TODO citation] where we've had three
-projects over the last 7 years, Tryggve[CITE], Tryggve2[CITE] and now
-Heilsa[CITE].
+projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/),
+[Tryggve2](https://neic.no/tryggve2/) and now Heilsa[CITE].
 
 As we in the nordics now move into production there is a need for both System
 Administrators and Helpdesk staff to be able to control and inspect the system.
