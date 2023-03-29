@@ -76,9 +76,10 @@ represent the first federated partners.
 
 In the nordics we have collaborated around our own implementation for our
 federated EGA nodes, we have done this under the umbrella of the Nordic
-e-Infrastructure Collaboration (NeIC)[TODO citation] where we've had three
-projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/) [@tryggve1],
-[Tryggve2](https://neic.no/tryggve2/) [@tryggve2] and now Heilsa[CITE].
+e-Infrastructure Collaboration (NeIC)[https://neic.no/] where we've had three
+projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
+[@tryggve1], [Tryggve2](https://neic.no/tryggve2/) [@tryggve2] and now
+[Heilsa](https://neic.no/heilsa) [@heilsa].
 
 As we in the nordics now move into production there is a need for both System
 Administrators and Helpdesk staff to be able to control and inspect the system.
@@ -89,19 +90,21 @@ Dashboard” during the Elixir Biohackathon 2022.
 
 # Results
 
-We used grafana[TODO: cite] to create a Minimal Viable Product (MVP) of a
-dashboard to view the current state of the systema and to give some simple
+We used [grafana](https://grafana.com) [TODO: cite] to create a Minimal Viable
+Product (MVP) of a dashboard to view the current state of the systema and to
+give some simple
 interaction points with system.
 
 ![An overview \label{fig1}](./paper-overview.png)
 
 There are two main views into the system. The first one is an overview over all
 files and what state they are in, whether they have been moved from the inbox,
-if they've been backed up and if they have gotten the EGAF identifiers from
-Central EGA[TODO: cite], see Figure \ref{fig1}. It is possible from this view to also
-click on a file to go to the second view with information about all events that
-has happened to that specific file, to aid the helpdesk staff in the task of
-supporting the submitting researcher, see Figure 2.
+if they've been backed up and if they have gotten the EGA identifiers from
+[Central EGA](https://ega-archive.org) [TODO: cite], see Figure \ref{fig1}. It
+is possible from this view to also click on a file to go to the second view
+with information about all events that has happened to that specific file, to
+aid the helpdesk staff in the task of supporting the submitting researcher, see
+Figure 2.
 
 We also made a proof-of-concept of controlling the system through the
 dashboard. It's possible to click on a "Retry" link and then the state of a
