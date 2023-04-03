@@ -1,6 +1,6 @@
 ---
-title: 'Operator dashboard for controlling the NeIC Sensitive Data Archive'
-title_short: 'Operator dashboard for the NeIC Sensitive Data Archive'
+title: 'Onboarding suite for Federated EGA nodes'
+title_short: 'Onboarding suite for Federated EGA nodes'
 tags:
   - onboarding
   - Federated EGA
@@ -9,12 +9,27 @@ authors:
   - name: Stefan Negru
     orcid: 0000-0002-6544-5022
     affiliation: 1
-  - name: Next person
-    orcid: XXX
+  - name: Albert Hornos Vidal
+    orcid: 0000-0002-7330-668X
+    affiliation: 4
+  - name: Alexandros Dimopoulos
+    orcid: 0000-0002-4602-2040
     affiliation: 2
+  - name: David Salgado
+    orcid: 0000-0002-5905-3591
+    affiliation: 3
+  - name: Liisa Lado-Villar
+    orcid:
+    affiliation: 1
 affiliations:
   - name: CSC – IT CENTER FOR SCIENCE, Finland
     index: 1
+  - name: Hellenic Naval Academy, Greece
+    index: 2
+  - name: Institut national de la santé et de la recherche médicale, France
+    index: 3
+  - name: Instituto Nacional de Bioinformática (INB), Spain
+    index: 4
 date: 11 Nov 2022
 cito-bibliography: paper.bib
 event: BioHackEU22
@@ -45,7 +60,7 @@ pasting above link (or yours) in
 
 # Introduction
 
-The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing personally identifiable genetic and phenotypic data resulting from biomedical research projects. The Federated EGA, consisting of the Central and Federated EGA nodes, will be a distributed network of repositories for sharing human -omics data and phenotypes. Each node of the federation is responsible for its own infrastructure and the connection to the Central EGA. Currently, the adoption and deployment of a new federated node is challenging due to the complexity of the project and the diversity of technological solutions used, in order to ensure the secure archiving of the data and the transfer of the information between the nodes.
+The European Genome-phenome Archive (EGA)[@EGA] is a service for permanent archiving and sharing personally identifiable genetic and phenotypic data resulting from biomedical research projects. The Federated EGA[@FEGA], consisting of the Central and Federated EGA nodes, will be a distributed network of repositories for sharing human -omics data and phenotypes. Each node of the federation is responsible for its own infrastructure and the connection to the Central EGA. Currently, the adoption and deployment of a new federated node is challenging due to the complexity of the project and the diversity of technological solutions used, in order to ensure the secure archiving of the data and the transfer of the information between the nodes.
 
 The goal of this project is to develop a suite consisting of simple scripts that would help newcomers to the federation to deeply understand the main concepts, while enabling them to get involved in the development of the technology as quickly as possible.
 
