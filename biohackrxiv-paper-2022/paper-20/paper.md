@@ -54,7 +54,7 @@ authors_short: People \emph{et al.}
 
 # Introduction
 
-The European Genome-phenome Archive (EGA)[@EGA] is a service for permanent archiving and sharing personally identifiable genetic and phenotypic data resulting from biomedical research projects. The Federated EGA[@FEGA], consisting of the Central and Federated EGA nodes, will be a distributed network of repositories for sharing human -omics data and phenotypes. Each node of the federation is responsible for its own infrastructure and the connection to the Central EGA. Currently, the adoption and deployment of a new federated node is challenging due to the complexity of the project and the diversity of technological solutions used, in order to ensure the secure archiving of the data and the transfer of the information between the nodes.
+The European Genome-phenome Archive (EGA)[@EGA] (also known as Central EGA - cEGA) is a service for permanent archiving and sharing personally identifiable genetic and phenotypic data resulting from biomedical research projects. The Federated EGA[@FEGA], consisting of the Central and Federated EGA nodes, will be a distributed network of repositories for sharing human -omics data and phenotypes. Each node of the federation is responsible for its own infrastructure and the connection to the Central EGA. Currently, the adoption and deployment of a new federated node is challenging due to the complexity of the project and the diversity of technological solutions used, in order to ensure the secure archiving of the data and the transfer of the information between the nodes.
 
 The goal of this project was to develop an onboarding suite consisting of simple scripts, supplemented by documentation, that would help newcomers to the EGA federation in order understand in depth the main concepts, while enabling them to get involved in the development of the technology as quickly as possible.
 
@@ -77,7 +77,22 @@ The following tasks were accomplished as part of the BioHackathon:
 
 ## Roles Involved in a Federated EGA Node
 
+In order to focus our work during the biohackathon we decided to first identify the roles involved in running a Federated EGA node:
+
+- **Node Representative** - aims to understand what services need to be adjust for their node so that they can run the federated EGA in their infrastructure;
+- **Developer** - needs documentation about the starting points of the code base in order to start reading as well as a demo stack of the services;
+- **Operator** - requires a technical checklist to see if my node is technically ready to join federated EGA
+- **Helpdesk** - want to see the files a submitter has submitted so that I can assist in the submission process
+- **Submitter** - would need to submit data to a Federated EGA node.
+
+Our attention was towards *Developers* and *Submitters* with the starter pack, while the documentation was we produced aimed to help *Node Representative* and *Operator* roles.
+
+Given that the *Submitter* role covers a broader spectrum of questions that such a role might have we decided to focus on the encryption of files, which is a requirement for a file to be correctly submitted.
+We underestood that an easy tool that can assist me to encrypt the files so we aimed to identify and document how such a tool could be utilized.
+
 ## FEGA Technical Requirements
+
+We summarized the technical requirements for joining the federation in the following table:
 
 |  # |       	Component       	|                                                                                                                      	Description                                                                                                                      	| Required |   Link to  |
 |:--:|:-----------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|
@@ -103,8 +118,76 @@ The following tasks were accomplished as part of the BioHackathon:
 
 Table: Federated EGA Technical Requirements
 
+This information is augumented with technologies utilized by current nodes (as of November 2022): in a fork of the [FEGA-Onboarding documentation](https://ahornos.github.io/FEGA-onboarding/topics/technical-operational/#technical-requirements).
+
+### Encryption
+
+All sensitive data uploaded to a FEGA node need to be encrypted using the crypt4gh standard[@crypt4gh]. For encrypting, apart from the file itself, all one needs is:
+1. The public key used for the encryption which is provided by the FEGA node
+One of the available crypt4gh implementations:
+    - [crypt4gh python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI
+    - [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper
+    - [crypt4gh-rust](https://github.com/EGA-archive/crypt4gh-rust) Rust implementation
+    - [crypt4gh](https://github.com/uio-bmi/crypt4gh) Java implementation
+    - [htslib-crypt4gh](https://github.com/samtools/htslib-crypt4gh) C implementation
+    - [crypt4gh](https://github.com/silverdaz/crypt4gh) C implementation 
+2. Optionally a private key created locally by the user 
+
+
 ## Federated EGA Starter Stack
 
+The FEGA Started Stack from https://github.com/neicnordic/sda-dashboard was developed agains the services developed in the Heilsa project, however
+another similar stack was identified at: https://github.com/EGA-archive/LocalEGA .
+
+During the Elixir Biohackathon 2022 the starter stack was developed further, bugs fixed and tested by members by of two nodes (Greece and France) that were new to the Federated EGA workflow.
+
+The bootstrapping script was able to illustrate the communication that happens between cEGA and FEGA node detailing the messages that are being sent between the two RabbitMQ, for example:
+
+- Ingest Message
+
+Message received from Central EGA to start ingestion at a Federated EGA node.
+
+Processed by the the sda-pipeline `ingest` service.
+
+```
+{
+   "type": "ingest",
+   "user":"john.smith@smth.org",
+   "filepath":"somedir/encrypted.file.c4gh",
+   "encrypted_checksums": [
+      { "type": "md5", "value": "1a79a4d60de6718e8e5b326e338ae533"},
+      { "type": "sha256", "value": "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c"}
+   ]
+}
+```
+
+- Accession ID Message
+
+Each file will receive an accession ID from Central EGA and this is done via a message sent from Central EGA to a Federated EGA node.
+
+Processed by the the sda-pipeline `finalize` service.
+```
+{
+    "type": "accession",
+    "user": "john.smith@smth.org",
+    "filepath": "somedir/encrypted.file.c4gh",
+    "accession_id": "EGAF00000123456",
+    "decrypted_checksums": [ 
+        { "type": "sha256", "value": "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c" },
+        { "type": "md5", "value": "1a79a4d60de6718e8e5b326e338ae533" }
+    ]
+}
+```
+
+# Conclusions and Future work
+
+Part of the members that joined our project represented two nodes that were considering joining the federation, and with their help we were able to identify the missing gaps in the technical requirements, documentation and starter stack, and ultimately were able to guide them through the process of submitting files using the starter stack.
+
+By taking into account different roles we were able to identify existing gaps in our how we documented the services developed within the Heilsa project and it was also quite useful for the development team working with the code-base and deployments as they could more easily get feedback from new nodes, that had little knowledge on how the messages and operations of FEGA can be organized.
+
+The outputs of the Technical requirements have been presented to the Federated EGA Operations Committee and the aim is to reflect the in future versions of the [FEGA-Onboarding](https://ega-archive.github.io/FEGA-onboarding/) documentation.
+
+One of the clear directions is that, given the number services required to run a FEGA node, we aim to simplify our setup and streamline our code base.
 
 # Acknowledgements
 
