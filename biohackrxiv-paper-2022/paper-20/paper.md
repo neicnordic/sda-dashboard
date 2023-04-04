@@ -38,7 +38,7 @@ affiliations:
     index: 1
   - name: Hellenic Naval Academy, Piraeus, Greece
     index: 2
-  - name: Institut national de la santé et de la recherche médicale (Inserm), Paris, France
+  - name: Institut Français de Bioinformatique (IFB), Paris, France
     index: 3
   - name: Instituto Nacional de Bioinformática (INB), Barcelona, Spain
     index: 4
