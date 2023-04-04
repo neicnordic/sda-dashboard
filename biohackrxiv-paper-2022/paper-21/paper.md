@@ -14,10 +14,10 @@ authors:
     orcid: 
   - name: Silvia Bahena
     affiliation: 2
-    orcid: 
+    orcid: 0000-0002-2734-0449
   - name: Marcos Casado Barbero
     affiliation: 2
-    orcid: 
+    orcid: 0000-0002-7747-6256
   - name: Betül Eren Keskin
     affiliation: 3
     orcid: 
@@ -30,7 +30,7 @@ authors:
 affiliations:
   - name: Uppsala University, ICM, blabla
     index: 1
-  - name: CRG???
+  - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 2
   - name: Linköping
     index: 3
