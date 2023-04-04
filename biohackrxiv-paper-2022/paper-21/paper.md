@@ -20,10 +20,10 @@ authors:
     orcid: 0000-0002-7747-6256
   - name: Betül Eren Keskin
     affiliation: 3
-    orcid: 
+    orcid: 0000-0003-2439-2558
   - name: Shreyas Shivakumara
     affiliation: 3
-    orcid: 
+    orcid: 0009-0006-8443-9839
   - name: Joshua Baskaran
     affiliation: 4
     orcid: 
