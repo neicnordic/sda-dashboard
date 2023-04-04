@@ -75,11 +75,14 @@ The goal of this project was to develop an onboarding suite consisting of simple
 At the same time we aimed to identify existing technologies and standards
 across FEGA nodes that can be used as a reference to upcoming nodes.
 
-This biohackathon project is a result of a nordic collaboration under the umbrella of the Nordic e-Infrastructure Collaboration (NeIC [@NEIC]) where we've had three projects over the last 7 years, Tryggve1  [@Tryggve1], Tryggve2 [@Tryggve2] and Heilsa [@Heilsa]. For this reason the source code and scripts are shared in the same repository as the "Operator dashboard for controlling the NeIC Sensitive Data Archive" (Project 21) from BioHackathon-Europe 2022.
+This biohackathon project is a result of a nordic collaboration under the umbrella of the Nordic e-Infrastructure Collaboration(NeIC)[https://neic.no/] [@NEIC] where we've had three projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
+[@Tryggve1], [Tryggve2](https://neic.no/tryggve2/) [@Tryggve2] and now [Heilsa](https://neic.no/heilsa) [@Heilsa]. For this reason the source code and scripts are shared in the same repository as the "Operator dashboard for controlling the NeIC Sensitive Data Archive" (Project 21) from BioHackathon-Europe 2022.
 
 # Results
 
-In order to achieve the project goals, our plan is to focus on the main pipeline, handling the archiving of the data submitted by users to Federated EGA. Specifically, the goal is to create a number of scripts that would lead the user/developer through the process followed from submitting a file to archiving it and making it available for downloading. The scripts will shed light on the processes under the hood, including the messaging between the services, the records stored in the database as well as the tools used for encrypting and decrypting the data.
+In order to achieve the project goals, our plan is to focus on the main pipeline, handling the archiving of the data submitted by users to Federated EGA. Specifically, the goal is to create a number of scripts that would lead the user/developer through the process followed from submitting a file to archiving it and making it available for downloading. 
+
+The scripts aimed to provide some clarity on the processes under the hood, including the messaging between (sent via [RabbitMQ](https://www.rabbitmq.com/)) the services, the records stored in the database as well as the tools used for encrypting and decrypting the data.
 
 The following tasks were accomplished as part of the BioHackathon:
 
@@ -132,29 +135,29 @@ We summarized the technical requirements for joining the federation in the follo
 
 Table: Federated EGA Technical Requirements
 
-Require parts are: 2,3,4,5,6,7,8,9,16,17,19
+From the table above the require points are: 2,3,4,5,6,7,8,9,16,17,19.
 
 This information is augumented with technologies utilized by current nodes (as of November 2022): in a fork of the [FEGA-Onboarding documentation](https://ahornos.github.io/FEGA-onboarding/topics/technical-operational/#technical-requirements).
 
 ### Encryption
 
-All sensitive data uploaded to a FEGA node need to be encrypted using the Crypt4GH standard. For encrypting, apart from the file itself, all one needs is:
-1. The public key used for the encryption which is provided by the FEGA node.
+All sensitive data uploaded to a FEGA node need to be encrypted using the Crypt4GH standard. For encrypting, apart from the file itself, all one needs are the following 2 types of keys:
 
-One of the available Crypt4GH implementations:
-    - [Crypt4GH python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI;
-    - [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper;
-    - [crypt4gh-rust](https://github.com/EGA-archive/crypt4gh-rust) Rust implementation;
-    - [Crypt4GH Java](https://github.com/uio-bmi/crypt4gh) implementation;
-    - [htslib-crypt4gh](https://github.com/samtools/htslib-crypt4gh) C implementation;
-    - [Crypt4GH C](https://github.com/silverdaz/crypt4gh) implementation.
+1. The public key used for the encryption which is provided by the FEGA node. One of the available Crypt4GH implementations:
+
+- [Crypt4GH python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI;
+- [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper;
+- [crypt4gh-rust](https://github.com/EGA-archive/crypt4gh-rust) Rust implementation;
+- [Crypt4GH Java](https://github.com/uio-bmi/crypt4gh) implementation;
+- [htslib-crypt4gh](https://github.com/samtools/htslib-crypt4gh) C implementation;
+- [Crypt4GH C](https://github.com/silverdaz/crypt4gh) implementation.
+
 2. Optionally a private key created locally by the user 
 
 
 ## Federated EGA Starter Stack
 
-The FEGA Started Stack from https://github.com/neicnordic/sda-dashboard was developed against the services developed in the Heilsa project, however
-another similar stack was identified at: https://github.com/EGA-archive/LocalEGA .
+The FEGA Started Stack from: https://github.com/neicnordic/sda-dashboard was developed against the services developed in the Heilsa project, however another similar stack was identified at: [LocalEGA](https://github.com/EGA-archive/LocalEGA) .
 
 During the Elixir Biohackathon 2022 the starter stack was developed further, bugs fixed and tested by members of two nodes (Greece and France) that were new to the Federated EGA workflow.
 
@@ -173,9 +176,11 @@ Processed by the the sda-pipeline `ingest` service.
    "filepath":"somedir/encrypted.file.c4gh",
    "encrypted_checksums": [
       { "type": "md5",
-      "value": "1a79a4d60de6718e8e5b326e338ae533"},
+      "value": 
+      "1a79a4d60de6718e8e5b326e338ae533"},
       { "type": "sha256", 
-      "value": "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c"}
+      "value": 
+      "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c"}
    ]
 }
 ```
@@ -193,7 +198,8 @@ Processed by the the sda-pipeline `finalize` service.
     "accession_id": "EGAF00000123456",
     "decrypted_checksums": [ 
         { "type": "sha256", 
-        "value": "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c" },
+        "value": 
+        "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c" },
         { "type": "md5",
         "value": "1a79a4d60de6718e8e5b326e338ae533" }
     ]
