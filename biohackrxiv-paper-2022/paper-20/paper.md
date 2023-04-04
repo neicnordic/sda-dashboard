@@ -75,7 +75,7 @@ The goal of this project was to develop an onboarding suite consisting of simple
 At the same time we aimed to identify existing technologies and standards
 across FEGA nodes that can be used as a reference to upcoming nodes.
 
-This biohackathon project is a result of a nordic collaboration under the umbrella of the Nordic e-Infrastructure Collaboration(NeIC)[https://neic.no/] [@NEIC] where we've had three projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
+This biohackathon project is a result of a Nordic collaboration under the umbrella of the Nordic e-Infrastructure Collaboration(NeIC)[https://neic.no/] [@NEIC] where we've had three projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
 [@Tryggve1], [Tryggve2](https://neic.no/tryggve2/) [@Tryggve2] and now [Heilsa](https://neic.no/heilsa) [@Heilsa]. For this reason the source code and scripts are shared in the same repository as the "Operator dashboard for controlling the NeIC Sensitive Data Archive" (Project 21) from BioHackathon-Europe 2022.
 
 # Results
