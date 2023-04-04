@@ -90,9 +90,8 @@ Dashboard” during the Elixir Biohackathon 2022.
 
 # Results
 
-We used [grafana](https://grafana.com) [TODO: cite] to create a Minimal Viable
-Product (MVP) of a dashboard to view the current state of the systema and to
-give some simple
+We used [grafana](https://grafana.com) to create a Minimal Viable Product (MVP)
+of a dashboard to view the current state of the systema and to give some simple
 interaction points with system.
 
 ![An overview of the state of the system. This can be filtered by submitters, file status and also assigned dataset. It shows the status of every file in the system and can also show some overall statistics of the system. \label{fig1}](./paper-overview.png)
@@ -100,10 +99,10 @@ interaction points with system.
 There are two main views into the system. The first one is an overview over all
 files and what state they are in, whether they have been moved from the inbox,
 if they've been backed up and if they have gotten the EGA identifiers from
-[Central EGA](https://ega-archive.org) [TODO: cite], see Figure \ref{fig1}. It
-is possible from this view to also click on a file to go to the second view
-with information about all events that has happened to that specific file, to
-aid the helpdesk staff in the task of supporting the submitting researcher, see
+[Central EGA](https://ega-archive.org), see Figure \ref{fig1}. It is possible
+from this view to also click on a file to go to the second view with
+information about all events that has happened to that specific file, to aid
+the helpdesk staff in the task of supporting the submitting researcher, see
 Figure \ref{fig2}.
 
 ![Detailed event log for a file. The top panel shows the current state of a file while the bottom panel contains a log of every event the file has gone through. \label{fig2}](./paper-file-detail.png)
