@@ -11,7 +11,7 @@ authors:
     affiliation: 1
   - name: Dimitris Bampalikis
     affiliation: 1
-    orcid: 
+    orcid: 0000-0002-2078-3079
   - name: Silvia Bahena
     affiliation: 2
     orcid: 0000-0002-2734-0449
@@ -28,7 +28,7 @@ authors:
     affiliation: 4
     orcid: 
 affiliations:
-  - name: Uppsala University, ICM, blabla
+  - name: National Bioinformatics Infrastructure Sweden (NBIS), Uppsala University, SciLifeLab, ICM - Department of Cell and Molecular Biology.
     index: 1
   - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 2
