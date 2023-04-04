@@ -65,7 +65,7 @@ This biohackathon project is a result of a nordic collaboration under the umbrel
 
 # Results
 
-In order to achieve the project goals, our plan to focus on the main pipeline, handling the archiving of the data submitted by users to Federated EGA. Specifically, the goal is to create a number of scripts that would lead the user/developer through the process followed from submitting a file to archiving it and making it available for downloading. The scripts will shed light on the processes under the hood, including the messaging between the services, the records stored in the database as well as the tools used for encrypting and decrypting the data.
+In order to achieve the project goals, our plan is to focus on the main pipeline, handling the archiving of the data submitted by users to Federated EGA. Specifically, the goal is to create a number of scripts that would lead the user/developer through the process followed from submitting a file to archiving it and making it available for downloading. The scripts will shed light on the processes under the hood, including the messaging between the services, the records stored in the database as well as the tools used for encrypting and decrypting the data.
 
 The following tasks were accomplished as part of the BioHackathon:
 
@@ -79,13 +79,13 @@ The following tasks were accomplished as part of the BioHackathon:
 
 In order to focus our work during the biohackathon we decided to first identify the roles involved in running a Federated EGA node:
 
-- **Node Representative** - aims to understand what services need to be adjust for their node so that they can run the federated EGA in their infrastructure;
-- **Developer** - needs documentation about the starting points of the code base in order to start reading as well as a demo stack of the services;
-- **Operator** - requires a technical checklist to see if my node is technically ready to join federated EGA
-- **Helpdesk** - want to see the files a submitter has submitted so that I can assist in the submission process
+- **Node Representative** - aims to understand what services need to be adjusted for their node so that they can run the federated EGA in their infrastructure;
+- **Developer** - needs documentation about the starting points of the code base, in order to start reading, as well as a demo stack of the services;
+- **Operator** - requires a technical checklist to see if the node is technically ready to join federated EGA
+- **Helpdesk** - wants to see the files a submitter has submitted, in order to be able to assist in the submission process
 - **Submitter** - would need to submit data to a Federated EGA node.
 
-Our attention was towards *Developers* and *Submitters* with the starter pack, while the documentation was we produced aimed to help *Node Representative* and *Operator* roles.
+Our attention was towards *Developers* and *Submitters* with the starter pack, while the documentation we produced aimed to help *Node Representative* and *Operator* roles.
 
 Given that the *Submitter* role covers a broader spectrum of questions that such a role might have we decided to focus on the encryption of files, which is a requirement for a file to be correctly submitted.
 We underestood that an easy tool that can assist me to encrypt the files so we aimed to identify and document how such a tool could be utilized.
@@ -109,11 +109,11 @@ We summarized the technical requirements for joining the federation in the follo
 | 11 | Main Programming Language 	| Main programming language for the technical stack pipeline                                                                                                                                                                                                	| -    	|        	|
 | 12 | Deployment Method         	| Means which technology is used to put in production different components                                                                                                                                                                                  	| -    	|        	|
 | 13 | Helpdesk Management System	| Main tool for user/helpdesk communication                                                                                                                                                                                                                 	| N    	|        	|
-| 14 | Helpdesk Portal Technology	| Federated EGA node helpe desk will provide  means of interacting with submitter, registering DPA, establishing DACs  and monitoring submissions.                                                                                                             	| N    	| 15     	|
+| 14 | Helpdesk Portal Technology	| Federated EGA node help desk will provide  means of interacting with submitter, registering DPA, establishing DACs  and monitoring submissions.                                                                                                             	| N    	| 15     	|
 | 15 | Monitoring Tool           	| Means of providing an overview of the status of submissions. Good also for auditing purposes.                                                                                                                                                             	| N    	| 14     	|
 | 16 | Metadata Submission Method	| Means how the researchers will send the metadata to Central EGA through a cEGA submitter portal, node portal or another solution                                                                                                                          	| Y    	|        	|
 | 17 | Download Solution         	| Means for a Requester to access the data once approval has been granted.                                                                                                                                                                                  	| Y    	| 7, 8, 18   |
-| 18 | Data Access Tool          	| Means of enabling Requesters to Download the archived data. tool for facilitating DACs                                                                                                                                                                    	| N    	|        	|
+| 18 | Data Access Tool          	| Means of enabling Requesters to Download the archived data. Tool for facilitating DACs                                                                                                                                                                    	| N    	|        	|
 | 19 | General Contact           	| Email or website to contact the team deploying the solution                                                                                                                                                                                               	| Y    	|        	|
 
 Table: Federated EGA Technical Requirements
@@ -123,7 +123,8 @@ This information is augumented with technologies utilized by current nodes (as o
 ### Encryption
 
 All sensitive data uploaded to a FEGA node need to be encrypted using the crypt4gh standard[@crypt4gh]. For encrypting, apart from the file itself, all one needs is:
-1. The public key used for the encryption which is provided by the FEGA node
+1. The public key used for the encryption which is provided by the FEGA node.
+
 One of the available crypt4gh implementations:
     - [crypt4gh python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI
     - [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper
@@ -136,10 +137,10 @@ One of the available crypt4gh implementations:
 
 ## Federated EGA Starter Stack
 
-The FEGA Started Stack from https://github.com/neicnordic/sda-dashboard was developed agains the services developed in the Heilsa project, however
+The FEGA Started Stack from https://github.com/neicnordic/sda-dashboard was developed against the services developed in the Heilsa project, however
 another similar stack was identified at: https://github.com/EGA-archive/LocalEGA .
 
-During the Elixir Biohackathon 2022 the starter stack was developed further, bugs fixed and tested by members by of two nodes (Greece and France) that were new to the Federated EGA workflow.
+During the Elixir Biohackathon 2022 the starter stack was developed further, bugs fixed and tested by members of two nodes (Greece and France) that were new to the Federated EGA workflow.
 
 The bootstrapping script was able to illustrate the communication that happens between cEGA and FEGA node detailing the messages that are being sent between the two RabbitMQ, for example:
 
