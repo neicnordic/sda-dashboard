@@ -48,7 +48,7 @@ affiliations:
     index: 3
   - name: Instituto Nacional de Bioinformática (INB), Barcelona, Spain
     index: 4
-  - name: National Bioinformatics Infrastructure Sweden (NBIS), Uppsala University, SciLifeLab, ICM - Department of Cell and Molecular Biology.
+  - name: National Bioinformatics Infrastructure Sweden (NBIS), Uppsala University, SciLifeLab, ICM - Department of Cell and Molecular Biology, Uppsala, Sweden.
     index: 5
   - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 6
