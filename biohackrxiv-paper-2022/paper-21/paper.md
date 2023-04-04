@@ -69,17 +69,17 @@ pasting above link (or yours) in
 Human genome and phenome data is classified as special categories under the EU
 GDPR legislation and this requires special care to be taken when using and
 re-using this data for research. To enable this in a compliant way the
-Federated EGA was established in 2022[TODO citation]. The Federated EGA is
-built on top of the already existing European Genome/Phenome Arcive (EGA). The
-nordic countries, Norway, Finland and Sweden together with Spain and Germany
-represent the first federated partners.
+Federated EGA was established in 2022 [@FEGA]. The Federated EGA is
+built on top of the already existing European Genome/Phenome Arcive (EGA)
+[@EGA]. The nordic countries, Norway, Finland and Sweden together with Spain
+and Germany represent the first federated partners.
 
 In the nordics we have collaborated around our own implementation for our
 federated EGA nodes, we have done this under the umbrella of the Nordic
-e-Infrastructure Collaboration (NeIC)[https://neic.no/] where we've had three
-projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
-[@tryggve1], [Tryggve2](https://neic.no/tryggve2/) [@tryggve2] and now
-[Heilsa](https://neic.no/heilsa) [@heilsa].
+e-Infrastructure Collaboration (NeIC)[https://neic.no/] [@NEIC] where we've had
+three projects over the last 7 years, [Tryggve1](https://neic.no/tryggve1/)
+[@Tryggve1], [Tryggve2](https://neic.no/tryggve2/) [@Tryggve2] and now
+[Heilsa](https://neic.no/heilsa) [@Heilsa].
 
 As we in the nordics now move into production there is a need for both System
 Administrators and Helpdesk staff to be able to control and inspect the system.
