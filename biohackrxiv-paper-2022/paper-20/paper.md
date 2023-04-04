@@ -63,7 +63,7 @@ group: "Project 20"
 git_url: "https://github.com/neicnordic/sda-dashboard/tree/feature/biohackrxiv-papers/biohackrxiv-paper-2022/paper-20"
 # This is the short authors description that is used at the
 # bottom of the generated paper (typically the first two authors):
-authors_short: People \emph{et al.}
+authors_short: Negru S \emph{et al.}
 ---
 
 # Introduction

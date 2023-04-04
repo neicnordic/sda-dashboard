@@ -9,30 +9,33 @@ authors:
   - name: Johan Viklund
     orcid: 0000-0003-1984-8522
     affiliation: 1
+  - name: Stefan Negru
+    orcid: 0000-0002-6544-5022
+    affiliation: 2
+  - name: Silvia Bahena
+    affiliation: 3
+    orcid: 0000-0002-2734-0449
   - name: Dimitris Bampalikis
     affiliation: 1
     orcid: 0000-0002-2078-3079
-  - name: Silvia Bahena
-    affiliation: 2
-    orcid: 0000-0002-2734-0449
-  - name: Marcos Casado Barbero
-    affiliation: 2
-    orcid: 0000-0002-7747-6256
-  - name: Betül Eren Keskin
-    affiliation: 3
-    orcid: 0000-0003-2439-2558
-  - name: Shreyas Shivakumara
-    affiliation: 3
-    orcid: 0009-0006-8443-9839
   - name: Joshua Baskaran
     affiliation: 4
     orcid: 
+  - name: Marcos Casado Barbero
+    affiliation: 3
+    orcid: 0000-0002-7747-6256
+  - name: Betül Eren Keskin
+    affiliation: 1
+    orcid: 0000-0003-2439-2558
+  - name: Shreyas Shivakumara
+    affiliation: 1
+    orcid: 0009-0006-8443-9839
 affiliations:
   - name: National Bioinformatics Infrastructure Sweden (NBIS), Uppsala University, SciLifeLab, ICM - Department of Cell and Molecular Biology.
     index: 1
-  - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
+  - name: CSC – IT CENTER FOR SCIENCE, Finland
     index: 2
-  - name: Linköping
+  - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 3
   - name: Norway
     index: 4
@@ -47,7 +50,7 @@ group: Project 21
 git_url: https://github.com/neicnordic/sda-dashboard
 # This is the short authors description that is used at the
 # bottom of the generated paper (typically the first two authors):
-authors_short: People \emph{et al.}
+authors_short: Viklund J \emph{et al.}
 ---
 
 
