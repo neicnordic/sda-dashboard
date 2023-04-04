@@ -129,8 +129,8 @@ whether our assumptions about what they want to see holds true.
 
 It was also quite useful for the development team working with the code-base
 and deployments as they could more easily see what's going on in the system so
-extending this with a few more developer focused views wou==ill probably be a
-good idea.
+extending this with a few more developer focused views will probably be a good
+idea.
 
 ## Acknowledgements
 
