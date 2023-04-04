@@ -37,7 +37,7 @@ affiliations:
     index: 2
   - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 3
-  - name: Norway
+  - name: ELIXIR Norway, Department for Informatics, University of Olso, Olso, Norway
     index: 4
 date: 11 Nov 2022
 cito-bibliography: paper.bib
