@@ -25,10 +25,10 @@ authors:
     orcid: 0000-0002-5905-3591
     affiliation: 3
   - name: Konstantinos Koumpouras
-    orcid:
+    orcid: 0000-0001-5598-4703
     affiliation: 5
   - name: Martin Norling
-    orcid:
+    orcid: 0000-0003-2463-6196
     affiliation: 5
   - name: Dimitris Bampalikis
     affiliation: 5
@@ -105,7 +105,8 @@ In order to focus our work during the biohackathon we decided to first identify 
 Our attention was towards *Developers* and *Submitters* with the starter pack, while the documentation we produced aimed to help *Node Representative* and *Operator* roles.
 
 Given that the *Submitter* role covers a broader spectrum of questions that such a role might have we decided to focus on the encryption of files, which is a requirement for a file to be correctly submitted.
-We underestood that an easy tool that can assist me to encrypt the files (using Crypt4GH [@crypt4gh]) so we aimed to identify and document how such a tool could be utilized.
+
+During the hackathon we identified that *Submitters* would require an easy tool that can assist with the files encryption (using Crypt4GH [@crypt4gh]), thus we aimed to identify and document how such a tool could be utilized.
 
 ## FEGA Technical Requirements
 
