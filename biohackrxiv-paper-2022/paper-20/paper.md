@@ -9,6 +9,9 @@ authors:
   - name: Stefan Negru
     orcid: 0000-0002-6544-5022
     affiliation: 1
+  - name: Johan Viklund
+    orcid: 0000-0003-1984-8522
+    affiliation: 5
   - name: Albert Hornos Vidal
     orcid: 0000-0002-7330-668X
     affiliation: 4
@@ -26,9 +29,6 @@ authors:
     affiliation: 5
   - name: Martin Norling
     orcid:
-    affiliation: 5
-  - name: Johan Viklund
-    orcid: 0000-0003-1984-8522
     affiliation: 5
   - name: Dimitris Bampalikis
     affiliation: 5
