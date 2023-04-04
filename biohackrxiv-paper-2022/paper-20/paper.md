@@ -40,17 +40,17 @@ authors:
     affiliation: 6
     orcid: 
 affiliations:
-  - name: CSC – IT CENTER FOR SCIENCE, Finland
+  - name: CSC – IT CENTER FOR SCIENCE, Espoo, Finland
     index: 1
-  - name: Hellenic Naval Academy, Greece
+  - name: Hellenic Naval Academy, Piraeus, Greece
     index: 2
-  - name: Institut national de la santé et de la recherche médicale (Inserm), France
+  - name: Institut national de la santé et de la recherche médicale (Inserm), Paris, France
     index: 3
-  - name: Instituto Nacional de Bioinformática (INB), Spain
+  - name: Instituto Nacional de Bioinformática (INB), Barcelona, Spain
     index: 4
-  - name: National Bioinformatics Infrastructure Sweden (NBIS), Sweden
+  - name: National Bioinformatics Infrastructure Sweden (NBIS), Uppsala University, SciLifeLab, ICM - Department of Cell and Molecular Biology.
     index: 5
-  - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), UK
+  - name: European Molecular Biology Laboratory - European Bioinformatics Institute (EMBL-EBI), Hinxton CB10 1SD, UK.
     index: 6
 date: 11 Nov 2022
 cito-bibliography: paper.bib
