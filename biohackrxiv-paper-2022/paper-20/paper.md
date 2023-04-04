@@ -38,7 +38,7 @@ affiliations:
     index: 1
   - name: Hellenic Naval Academy, Piraeus, Greece
     index: 2
-  - name: Institut Français de Bioinformatique (IFB), Paris, France
+  - name: CNRS, INSERM, Institut Français de Bioinformatique, IFB-core, UMS 3601, Evry, France.
     index: 3
   - name: Instituto Nacional de Bioinformática (INB), Barcelona, Spain
     index: 4
