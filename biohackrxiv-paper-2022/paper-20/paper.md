@@ -88,7 +88,7 @@ In order to focus our work during the biohackathon we decided to first identify 
 Our attention was towards *Developers* and *Submitters* with the starter pack, while the documentation we produced aimed to help *Node Representative* and *Operator* roles.
 
 Given that the *Submitter* role covers a broader spectrum of questions that such a role might have we decided to focus on the encryption of files, which is a requirement for a file to be correctly submitted.
-We underestood that an easy tool that can assist me to encrypt the files so we aimed to identify and document how such a tool could be utilized.
+We underestood that an easy tool that can assist me to encrypt the files (using Crypt4GH[@crypt4gh]) so we aimed to identify and document how such a tool could be utilized.
 
 ## FEGA Technical Requirements
 
@@ -103,7 +103,7 @@ We summarized the technical requirements for joining the federation in the follo
 | 5  | Submitter Inbox           	| An Inbox solution for the Researcher to submit files to a specific Node (e.g. SFTP, REST API). The Inbox needs to be accessible by a Researcher via an URL.                                                                                               	| Y    	| 2, 3   	|
 | 6  | Ingest Pipeline           	| Means of interfacing with the cEGA so that the  required messages are being sent at relevant steps of the submission  process. https://localega.readthedocs.io/en/latest/amqp.html                                                                        	| Y    	| 4, 7, 8, 9 |
 | 7  | Archive storage           	| Storage solution for storing archived files.  e.g. S3, POSIX etc.                                                                                                                                                                                         	| Y    	| 6      	|
-| 8  | Archive File Database     	| Means of storing information about the  archived files and their AccessionIDs and dataset IDs mapping to  AccessionIDs (file to dataset mapping). Note: other details can be stored in the database e.g. checksums, timestamps, headers of crypt4gh file etc. | Y    	| 6      	|
+| 8  | Archive File Database     	| Means of storing information about the  archived files and their AccessionIDs and dataset IDs mapping to  AccessionIDs (file to dataset mapping). Note: other details can be stored in the database e.g. checksums, timestamps, headers of Crypt4GH file etc. | Y    	| 6      	|
 | 9  | Backup Storage            	| Storage solution for storing a backup of the archived files.  e.g. S3, POSIX etc. Note: A file needs to be backed up in a different location than the Archive                                                                                             	| Y    	| 6      	|
 | 10 | Main Source Code Repository   | Where the source code can be found                                                                                                                                                                                                                        	| N    	|        	|
 | 11 | Main Programming Language 	| Main programming language for the technical stack pipeline                                                                                                                                                                                                	| -    	|        	|
@@ -122,16 +122,16 @@ This information is augumented with technologies utilized by current nodes (as o
 
 ### Encryption
 
-All sensitive data uploaded to a FEGA node need to be encrypted using the crypt4gh standard[@crypt4gh]. For encrypting, apart from the file itself, all one needs is:
+All sensitive data uploaded to a FEGA node need to be encrypted using the Crypt4GH standard. For encrypting, apart from the file itself, all one needs is:
 1. The public key used for the encryption which is provided by the FEGA node.
 
-One of the available crypt4gh implementations:
-    - [crypt4gh python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI
-    - [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper
-    - [crypt4gh-rust](https://github.com/EGA-archive/crypt4gh-rust) Rust implementation
-    - [crypt4gh](https://github.com/uio-bmi/crypt4gh) Java implementation
-    - [htslib-crypt4gh](https://github.com/samtools/htslib-crypt4gh) C implementation
-    - [crypt4gh](https://github.com/silverdaz/crypt4gh) C implementation 
+One of the available Crypt4GH implementations:
+    - [Crypt4GH python](https://github.com/EGA-archive/crypt4gh) module or [crypt4gh-gui python](https://github.com/CSCfi/crypt4gh-gui) module wrapper with GUI;
+    - [crypth4gh go](https://github.com/neicnordic/crypt4gh) implementation or [sdi-cli](https://github.com/NBISweden/sda-cli) go wrapper;
+    - [crypt4gh-rust](https://github.com/EGA-archive/crypt4gh-rust) Rust implementation;
+    - [Crypt4GH Java](https://github.com/uio-bmi/crypt4gh) implementation;
+    - [htslib-crypt4gh](https://github.com/samtools/htslib-crypt4gh) C implementation;
+    - [Crypt4GH C](https://github.com/silverdaz/crypt4gh) implementation.
 2. Optionally a private key created locally by the user 
 
 
