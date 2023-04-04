@@ -33,12 +33,6 @@ authors:
   - name: Dimitris Bampalikis
     affiliation: 5
     orcid: 0000-0002-2078-3079
-  - name: Silvia Bahena
-    affiliation: 6
-    orcid: 0000-0002-2734-0449
-  - name: Marcos Casado Barbero
-    affiliation: 6
-    orcid: 
 affiliations:
   - name: CSC – IT CENTER FOR SCIENCE, Espoo, Finland
     index: 1
