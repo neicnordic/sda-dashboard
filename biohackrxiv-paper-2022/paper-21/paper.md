@@ -69,7 +69,7 @@ pasting above link (or yours) in
 
 # Introduction
 
-Human genome and phenome data is classified as sensitive personal data under the EU
+Human genome and phenome data is classified as special categories data under the EU
 GDPR legislation ([Art. 9 GDPR](https://gdpr-info.eu/art-9-gdpr/)). This requires special care to be taken when processing and
 re-using this data for research. To enable this in a compliant way, a
 federated approach was applied to the existing European Genome-phenome Archive ([EGA(https://ega-archive.org/)]) [@EGA],
