@@ -36,7 +36,7 @@ authors:
 affiliations:
   - name: CSC – IT CENTER FOR SCIENCE, Espoo, Finland
     index: 1
-  - name: Hellenic Naval Academy, Piraeus, Greece
+  - name: Biomedical Sciences Research Center Alexander Fleming, Vari, Greece
     index: 2
   - name: CNRS, INSERM, Institut Français de Bioinformatique, IFB-core, UMS 3601, Evry, France.
     index: 3
